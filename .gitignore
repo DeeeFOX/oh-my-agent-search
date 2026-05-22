@@ -1,0 +1,15 @@
+.DS_Store
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Local Claude config exports and private endpoint notes.
+.claude/
+.mcp.local.json
+local-notes/
+
+# Logs and generated output.
+*.log
+coverage/
+dist/
