@@ -22,15 +22,17 @@ Avoid `project` scope until the team has reviewed the exact `.mcp.json` and endp
 
 ## Install Flow
 
-1. Verify SearXNG JSON output.
-2. Preview the MCP command.
-3. Preview with `--check-first` when the endpoint should be verified before setup.
-4. Run the installer with `--apply`.
-5. Prefer `--check-first --apply` when the endpoint is reachable from the current machine.
-6. Check `claude mcp list`.
-7. Check `claude mcp get searxng`.
-8. Open `/mcp` inside Claude Code.
-9. Run a public-safe smoke test.
+1. Get a trusted SearXNG endpoint, or start a local one with [Local SearXNG Setup](local-searxng.md).
+2. Verify SearXNG JSON output.
+3. Preview the MCP command.
+4. Preview with `--check-first` when the endpoint should be verified before setup.
+5. Run the installer with `--apply`.
+6. Prefer `--check-first --apply` when the endpoint is reachable from the current machine.
+7. Check `claude mcp list`.
+8. Check `claude mcp get searxng`.
+9. Open `/mcp` inside Claude Code.
+10. Run a public-safe smoke test.
+11. Run a negative test for private-context leakage.
 
 ## Smoke Test
 
@@ -77,6 +79,20 @@ If search returns errors:
 - verify direct JSON output with `npm run verify:searxng`
 - confirm the endpoint is trusted and reachable
 - confirm the selected MCP adapter still matches the documented command
+
+## Uninstall
+
+Preview removal:
+
+```sh
+make uninstall-preview
+```
+
+Remove after review:
+
+```sh
+make uninstall-apply
+```
 
 ## References
 

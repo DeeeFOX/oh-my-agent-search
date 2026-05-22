@@ -42,6 +42,7 @@ Use this repository to execute the chosen path.
 | Claude Code should use an explicit MCP boundary. | [docs/claude-code.md](claude-code.md) and [scripts/install-claude-code.mjs](../scripts/install-claude-code.mjs). |
 | Search queries must be public-safe. | [docs/security.md](security.md) and [templates/claude-code-instruction.md](../templates/claude-code-instruction.md). |
 | Public SearXNG instances are weak durable defaults. | [docs/searxng.md](searxng.md). |
+| Users may not have a trusted endpoint on day one. | [docs/local-searxng.md](local-searxng.md), [docker-compose.yml](../docker-compose.yml), and [templates/searxng/settings.yml](../templates/searxng/settings.yml). |
 | Project-scoped MCP config can leak shared assumptions. | [docs/security.md](security.md) and the installer's `--allow-project-scope` guard. |
 | Setup needs repeatable checks, not only prose. | [scripts/doctor.mjs](../scripts/doctor.mjs), `make doctor`, and `make verify-searxng`. |
 | Adapter choice must remain reviewable. | [docs/adapter-choice.md](adapter-choice.md) and `make install-preview`. |
@@ -65,7 +66,7 @@ When extracting installation material from a research report:
 The first installable path is intentionally narrow:
 
 ```text
-Claude Code -> local stdio MCP adapter -> trusted SearXNG endpoint -> public search engines
+Claude Code -> local stdio MCP adapter -> trusted or local SearXNG endpoint -> public search engines
 ```
 
 The current default command shape is:

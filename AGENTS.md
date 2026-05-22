@@ -39,7 +39,7 @@ make review
 For endpoint-specific work, also run:
 
 ```sh
-npm run verify:searxng -- --url https://search.example.org
+make verify-searxng URL="$SEARXNG_URL"
 ```
 
 Use a real endpoint only in local commands. Do not commit it.

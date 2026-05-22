@@ -26,6 +26,14 @@ export SEARXNG_URL="https://search.example.org"
 
 Replace the placeholder with a real trusted endpoint before running any command that verifies network access.
 
+If you do not have a trusted endpoint yet, create a local one:
+
+```sh
+make setup-searxng
+npm run setup:searxng -- --apply --start
+export SEARXNG_URL="http://127.0.0.1:8080"
+```
+
 Verify JSON output:
 
 ```sh
@@ -48,6 +56,13 @@ Install after reviewing the command:
 
 ```sh
 make install-apply-check URL="$SEARXNG_URL"
+```
+
+Remove the Claude Code MCP server if needed:
+
+```sh
+make uninstall-preview
+make uninstall-apply
 ```
 
 Verify Claude Code sees the server:
@@ -82,11 +97,16 @@ Prefer `local` or `user` MCP scope. Use `project` scope only after reviewing the
 
 ```sh
 npm run doctor
+npm run setup:searxng
+npm run setup:searxng -- --apply --start
 npm run install:claude-code -- --url https://search.example.org
 npm run install:claude-code -- --url https://search.example.org --apply
+npm run uninstall:claude-code
 make doctor
+make setup-searxng
 make install-preview URL=https://search.example.org
 make install-apply URL=https://search.example.org
+make uninstall-preview
 ```
 
 With a real trusted endpoint:
@@ -105,13 +125,16 @@ make install-apply-check URL="$SEARXNG_URL"
 
 - [docs/adapter-choice.md](docs/adapter-choice.md) - current adapter default and replacement criteria.
 - [docs/claude-code.md](docs/claude-code.md) - Claude Code setup and verification.
+- [docs/local-searxng.md](docs/local-searxng.md) - local Docker Compose SearXNG setup.
 - [docs/research-to-starter.md](docs/research-to-starter.md) - how research findings become installable starter artifacts.
 - [docs/searxng.md](docs/searxng.md) - SearXNG endpoint requirements.
 - [docs/security.md](docs/security.md) - privacy and MCP safety guidance.
 - [templates/claude-code-instruction.md](templates/claude-code-instruction.md) - local instruction template.
 - [templates/mcp-server.json](templates/mcp-server.json) - project-scope MCP template using environment expansion.
 - [scripts/doctor.mjs](scripts/doctor.mjs) - local readiness checks.
+- [scripts/setup-searxng-local.mjs](scripts/setup-searxng-local.mjs) - dry-run-first local SearXNG setup.
 - [scripts/self-test.mjs](scripts/self-test.mjs) - offline tests for installer guards and dry-run output.
+- [scripts/uninstall-claude-code.mjs](scripts/uninstall-claude-code.mjs) - dry-run-first Claude Code MCP removal.
 - [scripts/verify-searxng-json.mjs](scripts/verify-searxng-json.mjs) - direct SearXNG JSON smoke test.
 - [scripts/install-claude-code.mjs](scripts/install-claude-code.mjs) - dry-run-first Claude Code MCP installer.
 

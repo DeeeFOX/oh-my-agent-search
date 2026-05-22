@@ -66,6 +66,26 @@ function checkClaude() {
   return true;
 }
 
+function checkDocker() {
+  const docker = run("docker", ["--version"]);
+  if (docker.error) {
+    printStatus("WARN", "Docker CLI not found; local SearXNG setup will require Docker or another trusted endpoint");
+    return true;
+  }
+
+  const dockerOutput = `${docker.stdout}${docker.stderr}`.trim();
+  printStatus("PASS", dockerOutput || "Docker CLI is available");
+
+  const compose = run("docker", ["compose", "version"]);
+  if (compose.status === 0) {
+    const composeOutput = `${compose.stdout}${compose.stderr}`.trim();
+    printStatus("PASS", composeOutput || "docker compose is available");
+  } else {
+    printStatus("WARN", "docker compose did not succeed; local SearXNG setup may need manual Docker configuration");
+  }
+  return true;
+}
+
 function checkSearxng(url) {
   if (!url) {
     printStatus("WARN", "No SearXNG URL provided; skipping JSON verification");
@@ -97,6 +117,7 @@ function main() {
   const checks = [
     checkNode(),
     checkClaude(),
+    checkDocker(),
     checkSearxng(args.url || process.env.SEARXNG_URL)
   ];
 

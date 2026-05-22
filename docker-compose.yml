@@ -1,0 +1,12 @@
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: oh-my-agent-search-searxng
+    restart: unless-stopped
+    ports:
+      - "${SEARXNG_BIND:-127.0.0.1:8080}:8080"
+    volumes:
+      - ./local/searxng:/etc/searxng:rw
+    environment:
+      BASE_URL: "${SEARXNG_BASE_URL:-http://127.0.0.1:8080/}"
+      INSTANCE_NAME: "oh-my-agent-search"

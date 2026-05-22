@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const installScript = join(here, "install-claude-code.mjs");
+const setupScript = join(here, "setup-searxng-local.mjs");
+const uninstallScript = join(here, "uninstall-claude-code.mjs");
 const verifyScript = join(here, "verify-searxng-json.mjs");
 
 function run(args) {
@@ -61,12 +63,26 @@ function testVerifyHelp() {
   assert(includes(result, "Usage:"), "verify help usage missing");
 }
 
+function testSetupDryRun() {
+  const result = run([setupScript]);
+  assert(result.status === 0, "setup dry-run should succeed");
+  assert(includes(result, "Dry-run only"), "setup dry-run label missing");
+}
+
+function testUninstallDryRun() {
+  const result = run([uninstallScript]);
+  assert(result.status === 0, "uninstall dry-run should succeed");
+  assert(includes(result, "claude mcp remove searxng"), "uninstall command missing");
+}
+
 const tests = [
   testDryRun,
   testProjectScopeGuard,
   testProjectScopeOverrideDryRun,
   testInvalidUrl,
-  testVerifyHelp
+  testVerifyHelp,
+  testSetupDryRun,
+  testUninstallDryRun
 ];
 
 try {

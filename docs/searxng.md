@@ -6,6 +6,8 @@ Use self-hosted or trusted managed SearXNG for durable coding-agent workflows.
 
 Public instances are acceptable only for quick, non-sensitive experiments. Do not configure random public-instance fallback as a default.
 
+If no trusted endpoint exists yet, use [Local SearXNG Setup](local-searxng.md) to start a local development instance.
+
 ## JSON Output
 
 Claude Code MCP adapters need structured search results. SearXNG must allow JSON output for the Search API.
@@ -22,7 +24,7 @@ search:
 After changing settings, restart SearXNG and verify:
 
 ```sh
-npm run verify:searxng -- --url https://search.example.org
+make verify-searxng URL=https://search.example.org
 ```
 
 If the endpoint returns `403 Forbidden`, JSON output is probably disabled.

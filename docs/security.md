@@ -55,3 +55,12 @@ Treat URL reading as a separate permission boundary:
 The installer is dry-run by default. It requires `--apply` before modifying Claude Code MCP configuration.
 
 Use `--allow-project-scope` only after reviewing the project-scope implications.
+
+The local SearXNG setup script is also dry-run by default. It writes generated settings only under ignored local files after `--apply`.
+
+Use the uninstall command to remove the Claude Code MCP server when a test setup is no longer needed:
+
+```sh
+make uninstall-preview
+make uninstall-apply
+```

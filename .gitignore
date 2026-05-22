@@ -7,6 +7,7 @@ node_modules/
 # Local Claude config exports and private endpoint notes.
 .claude/
 .mcp.local.json
+local/
 local-notes/
 
 # Logs and generated output.
