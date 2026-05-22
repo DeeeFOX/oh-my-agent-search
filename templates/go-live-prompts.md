@@ -11,7 +11,7 @@ Use the configured SearXNG MCP tool to search for one public official documentat
 ## Lifecycle Check
 
 ```text
-Explain whether this SearXNG MCP search setup will still work after restarting Claude Code, opening a second Claude Code session, or switching projects. Base the answer on the configured MCP scope and whether the SearXNG endpoint is reachable.
+Explain whether this SearXNG MCP search setup will still work after restarting Claude Code, opening a second Claude Code session, or switching projects. Base the answer on the configured MCP scope and whether the SearXNG endpoint is reachable. Do not print private endpoints, local absolute paths, usernames, account identifiers, or raw command output. If the current scope is local, explain that another project folder needs its own local config or a user-scoped install.
 ```
 
 ## Negative Privacy Check

@@ -64,6 +64,27 @@ A second Claude Code client follows the configured scope:
 - any project + `user` scope: expected to work if endpoint is reachable
 - `project` scope: expected to work for trusted users of that project after approval
 
+## Different Folder Behavior
+
+If Claude Code is closed and reopened from another folder, availability depends on the installed MCP scope:
+
+| Scope | Another folder can use search? | Action |
+| --- | --- | --- |
+| `local` | No | Add the MCP server in the new project, or reinstall with `user` scope if cross-project search is intended. |
+| `user` | Yes | Verify with `claude mcp get searxng` or `/mcp`. |
+| `project` | Only where the reviewed project MCP config exists | Open the project that owns the config, or add a local/user-scoped server for the new folder. |
+
+Do not assume one working project means every project has search. Check the actual scope before answering the user.
+
+## Host Restart Behavior
+
+After a machine restart, check two layers:
+
+1. the container runtime or managed SearXNG service is running
+2. the SearXNG endpoint responds to a public-safe search check
+
+Runtime auto-start behavior depends on the user's container runtime or service manager. Do not publish machine-specific startup files, private host paths, or private network details in shared docs or issues.
+
 ## Disable Or Remove
 
 Preview removal:
