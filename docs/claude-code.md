@@ -24,11 +24,13 @@ Avoid `project` scope until the team has reviewed the exact `.mcp.json` and endp
 
 1. Verify SearXNG JSON output.
 2. Preview the MCP command.
-3. Run the installer with `--apply`.
-4. Check `claude mcp list`.
-5. Check `claude mcp get searxng`.
-6. Open `/mcp` inside Claude Code.
-7. Run a public-safe smoke test.
+3. Preview with `--check-first` when the endpoint should be verified before setup.
+4. Run the installer with `--apply`.
+5. Prefer `--check-first --apply` when the endpoint is reachable from the current machine.
+6. Check `claude mcp list`.
+7. Check `claude mcp get searxng`.
+8. Open `/mcp` inside Claude Code.
+9. Run a public-safe smoke test.
 
 ## Smoke Test
 

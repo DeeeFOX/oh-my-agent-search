@@ -10,6 +10,7 @@ This is the installable companion to [awesome-agent-search](https://github.com/D
 
 - verifies that a trusted SearXNG endpoint supports JSON search
 - generates the Claude Code MCP command for a SearXNG search adapter
+- can precheck SearXNG before installation with `--check-first`
 - installs only when `--apply` is provided
 - keeps real endpoints out of committed files
 - provides a reusable Claude Code search instruction
@@ -23,6 +24,8 @@ Use a trusted SearXNG endpoint. Shared docs use a placeholder:
 export SEARXNG_URL="https://search.example.org"
 ```
 
+Replace the placeholder with a real trusted endpoint before running any command that verifies network access.
+
 Verify JSON output:
 
 ```sh
@@ -35,10 +38,16 @@ Preview the Claude Code MCP command:
 make install-preview URL="$SEARXNG_URL"
 ```
 
+Preview with endpoint verification first:
+
+```sh
+make install-preview-check URL="$SEARXNG_URL"
+```
+
 Install after reviewing the command:
 
 ```sh
-make install-apply URL="$SEARXNG_URL"
+make install-apply-check URL="$SEARXNG_URL"
 ```
 
 Verify Claude Code sees the server:
@@ -73,19 +82,28 @@ Prefer `local` or `user` MCP scope. Use `project` scope only after reviewing the
 
 ```sh
 npm run doctor
-npm run verify:searxng -- --url https://search.example.org
 npm run install:claude-code -- --url https://search.example.org
 npm run install:claude-code -- --url https://search.example.org --apply
 make doctor
-make verify-searxng URL=https://search.example.org
 make install-preview URL=https://search.example.org
 make install-apply URL=https://search.example.org
+```
+
+With a real trusted endpoint:
+
+```sh
+npm run verify:searxng -- --url "$SEARXNG_URL"
+npm run install:claude-code -- --url "$SEARXNG_URL" --check-first
+make verify-searxng URL="$SEARXNG_URL"
+make install-preview-check URL="$SEARXNG_URL"
+make install-apply-check URL="$SEARXNG_URL"
 ```
 
 `install:claude-code` defaults to dry-run. It does not modify Claude Code unless `--apply` is passed.
 
 ## Repository Layout
 
+- [docs/adapter-choice.md](docs/adapter-choice.md) - current adapter default and replacement criteria.
 - [docs/claude-code.md](docs/claude-code.md) - Claude Code setup and verification.
 - [docs/research-to-starter.md](docs/research-to-starter.md) - how research findings become installable starter artifacts.
 - [docs/searxng.md](docs/searxng.md) - SearXNG endpoint requirements.
@@ -93,6 +111,7 @@ make install-apply URL=https://search.example.org
 - [templates/claude-code-instruction.md](templates/claude-code-instruction.md) - local instruction template.
 - [templates/mcp-server.json](templates/mcp-server.json) - project-scope MCP template using environment expansion.
 - [scripts/doctor.mjs](scripts/doctor.mjs) - local readiness checks.
+- [scripts/self-test.mjs](scripts/self-test.mjs) - offline tests for installer guards and dry-run output.
 - [scripts/verify-searxng-json.mjs](scripts/verify-searxng-json.mjs) - direct SearXNG JSON smoke test.
 - [scripts/install-claude-code.mjs](scripts/install-claude-code.mjs) - dry-run-first Claude Code MCP installer.
 

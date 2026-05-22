@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const DEFAULT_PACKAGE = "mcp-searxng";
 const DEFAULT_SERVER_NAME = "searxng";
 const VALID_SCOPES = new Set(["local", "user", "project"]);
+const here = dirname(fileURLToPath(import.meta.url));
 
 function parseArgs(argv) {
   const args = {
@@ -22,6 +25,8 @@ function parseArgs(argv) {
     else if (value === "--package") args.packageName = argv[++index];
     else if (value === "--apply") args.apply = true;
     else if (value === "--allow-project-scope") args.allowProjectScope = true;
+    else if (value === "--check-first") args.checkFirst = true;
+    else if (value === "--timeout-ms") args.timeoutMs = argv[++index];
     else if (value === "--help" || value === "-h") args.help = true;
     else throw new Error(`Unknown argument: ${value}`);
   }
@@ -31,12 +36,13 @@ function parseArgs(argv) {
 
 function usage() {
   return [
-    "Usage: node scripts/install-claude-code.mjs --url <searxng-url> [--scope local|user|project] [--apply]",
+    "Usage: node scripts/install-claude-code.mjs --url <searxng-url> [--scope local|user|project] [--check-first] [--apply]",
     "",
     "Dry-run is the default. Add --apply to run claude mcp add.",
     "",
     "Examples:",
     "  npm run install:claude-code -- --url https://search.example.org",
+    "  npm run install:claude-code -- --url https://search.example.org --check-first",
     "  npm run install:claude-code -- --url https://search.example.org --apply"
   ].join("\n");
 }
@@ -77,6 +83,18 @@ function formatCommand(command, args) {
   return [command, ...args.map((arg) => (arg.includes(" ") ? JSON.stringify(arg) : arg))].join(" ");
 }
 
+function runPrecheck(args) {
+  const script = join(here, "verify-searxng-json.mjs");
+  const verifyArgs = [script, "--url", args.url];
+  if (args.timeoutMs) verifyArgs.push("--timeout-ms", args.timeoutMs);
+
+  const result = spawnSync(process.execPath, verifyArgs, { stdio: "inherit" });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error("SearXNG JSON precheck failed. Fix the endpoint before installing.");
+  }
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
@@ -85,6 +103,8 @@ function main() {
   }
 
   validateArgs(args);
+  if (args.checkFirst) runPrecheck(args);
+
   const claudeArgs = buildClaudeArgs(args);
   const command = formatCommand("claude", claudeArgs);
 
