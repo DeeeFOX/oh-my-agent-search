@@ -26,19 +26,19 @@ export SEARXNG_URL="https://search.example.org"
 Verify JSON output:
 
 ```sh
-npm run verify:searxng -- --url "$SEARXNG_URL"
+make verify-searxng URL="$SEARXNG_URL"
 ```
 
 Preview the Claude Code MCP command:
 
 ```sh
-npm run install:claude-code -- --url "$SEARXNG_URL"
+make install-preview URL="$SEARXNG_URL"
 ```
 
 Install after reviewing the command:
 
 ```sh
-npm run install:claude-code -- --url "$SEARXNG_URL" --apply
+make install-apply URL="$SEARXNG_URL"
 ```
 
 Verify Claude Code sees the server:
@@ -76,6 +76,10 @@ npm run doctor
 npm run verify:searxng -- --url https://search.example.org
 npm run install:claude-code -- --url https://search.example.org
 npm run install:claude-code -- --url https://search.example.org --apply
+make doctor
+make verify-searxng URL=https://search.example.org
+make install-preview URL=https://search.example.org
+make install-apply URL=https://search.example.org
 ```
 
 `install:claude-code` defaults to dry-run. It does not modify Claude Code unless `--apply` is passed.
@@ -83,6 +87,7 @@ npm run install:claude-code -- --url https://search.example.org --apply
 ## Repository Layout
 
 - [docs/claude-code.md](docs/claude-code.md) - Claude Code setup and verification.
+- [docs/research-to-starter.md](docs/research-to-starter.md) - how research findings become installable starter artifacts.
 - [docs/searxng.md](docs/searxng.md) - SearXNG endpoint requirements.
 - [docs/security.md](docs/security.md) - privacy and MCP safety guidance.
 - [templates/claude-code-instruction.md](templates/claude-code-instruction.md) - local instruction template.

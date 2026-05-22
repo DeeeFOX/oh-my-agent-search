@@ -26,19 +26,19 @@ export SEARXNG_URL="https://search.example.org"
 验证 JSON 输出：
 
 ```sh
-npm run verify:searxng -- --url "$SEARXNG_URL"
+make verify-searxng URL="$SEARXNG_URL"
 ```
 
 预览 Claude Code MCP 命令：
 
 ```sh
-npm run install:claude-code -- --url "$SEARXNG_URL"
+make install-preview URL="$SEARXNG_URL"
 ```
 
 确认后安装：
 
 ```sh
-npm run install:claude-code -- --url "$SEARXNG_URL" --apply
+make install-apply URL="$SEARXNG_URL"
 ```
 
 检查 Claude Code 是否识别 server：
@@ -80,3 +80,7 @@ SearXNG 只用于公开信息搜索。不要把以下内容放进搜索 query：
 - 隐私友好的默认指令
 
 Codex、OpenClaw、remote HTTP MCP servers 和团队托管方案，应该等到有同等验证后再加入。
+
+## 调研如何落地
+
+[docs/research-to-starter.md](docs/research-to-starter.md) 说明了如何把 `awesome-agent-search` 中的调研结论拆成安装型 starter：SearXNG JSON 验证、Claude Code MCP 接入、dry-run installer、安全指令、smoke test 和 negative test。
