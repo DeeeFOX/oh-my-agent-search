@@ -39,7 +39,7 @@ make review
 For endpoint-specific work, also run:
 
 ```sh
-make verify-searxng URL="$SEARXNG_URL"
+make verify-search URL="$SEARXNG_URL"
 ```
 
 Use a real endpoint only in local commands. Do not commit it.

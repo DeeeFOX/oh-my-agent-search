@@ -24,10 +24,13 @@ search:
 After changing settings, restart SearXNG and verify:
 
 ```sh
-make verify-searxng URL=https://search.example.org
+make verify-json URL=https://search.example.org
+make verify-search URL=https://search.example.org
 ```
 
 If the endpoint returns `403 Forbidden`, JSON output is probably disabled.
+
+If JSON works but search returns no results, use a search engine profile that is available in your region. Do not document regional service workarounds.
 
 ## Safe Defaults
 

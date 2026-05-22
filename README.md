@@ -34,10 +34,23 @@ npm run setup:searxng -- --apply --start
 export SEARXNG_URL="http://127.0.0.1:8080"
 ```
 
-Verify JSON output:
+If the default search engines are not available from your region, use a region-appropriate profile:
 
 ```sh
-make verify-searxng URL="$SEARXNG_URL"
+make setup-searxng PROFILE=bing-only
+npm run setup:searxng -- --profile bing-only --apply --start
+```
+
+Verify JSON output only:
+
+```sh
+make verify-json URL="$SEARXNG_URL"
+```
+
+Verify that search returns at least one result:
+
+```sh
+make verify-search URL="$SEARXNG_URL"
 ```
 
 Preview the Claude Code MCP command:
@@ -112,9 +125,10 @@ make uninstall-preview
 With a real trusted endpoint:
 
 ```sh
-npm run verify:searxng -- --url "$SEARXNG_URL"
+npm run verify:searxng -- --url "$SEARXNG_URL" --min-results 1
 npm run install:claude-code -- --url "$SEARXNG_URL" --check-first
-make verify-searxng URL="$SEARXNG_URL"
+make verify-json URL="$SEARXNG_URL"
+make verify-search URL="$SEARXNG_URL"
 make install-preview-check URL="$SEARXNG_URL"
 make install-apply-check URL="$SEARXNG_URL"
 ```
@@ -126,9 +140,11 @@ make install-apply-check URL="$SEARXNG_URL"
 - [docs/adapter-choice.md](docs/adapter-choice.md) - current adapter default and replacement criteria.
 - [docs/claude-code.md](docs/claude-code.md) - Claude Code setup and verification.
 - [docs/local-searxng.md](docs/local-searxng.md) - local Docker Compose SearXNG setup.
+- [docs/privacy-reality.md](docs/privacy-reality.md) - real privacy boundaries of local SearXNG and MCP search.
 - [docs/research-to-starter.md](docs/research-to-starter.md) - how research findings become installable starter artifacts.
 - [docs/searxng.md](docs/searxng.md) - SearXNG endpoint requirements.
 - [docs/security.md](docs/security.md) - privacy and MCP safety guidance.
+- [docs/troubleshooting.md](docs/troubleshooting.md) - sanitized field lessons and common setup fixes.
 - [templates/claude-code-instruction.md](templates/claude-code-instruction.md) - local instruction template.
 - [templates/mcp-server.json](templates/mcp-server.json) - project-scope MCP template using environment expansion.
 - [scripts/doctor.mjs](scripts/doctor.mjs) - local readiness checks.
@@ -149,6 +165,10 @@ First release scope:
 - privacy-safe instructions
 
 Codex, OpenClaw, remote HTTP MCP servers, and managed team setups should be added only after equivalent verification exists.
+
+## Privacy Reality
+
+Local SearXNG avoids sending queries to a random public SearXNG instance, but selected upstream search engines still receive the search query. This repository provides instruction guards and local verification, not automatic removal of private content from every query.
 
 ## References
 

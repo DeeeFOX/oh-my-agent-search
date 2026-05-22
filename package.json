@@ -12,6 +12,8 @@
     "setup:searxng": "node scripts/setup-searxng-local.mjs",
     "test": "npm run check && npm run self-test",
     "uninstall:claude-code": "node scripts/uninstall-claude-code.mjs",
+    "verify:json": "node scripts/verify-searxng-json.mjs --min-results 0",
+    "verify:search": "node scripts/verify-searxng-json.mjs --min-results 1 --timeout-ms 30000 --retries 2",
     "verify:searxng": "node scripts/verify-searxng-json.mjs"
   },
   "engines": {

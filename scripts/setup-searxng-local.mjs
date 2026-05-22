@@ -8,19 +8,24 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
-const templatePath = join(root, "templates", "searxng", "settings.yml");
+const templateRoot = join(root, "templates", "searxng");
+const profiles = new Map([
+  ["default", join(templateRoot, "settings.yml")],
+  ["bing-only", join(templateRoot, "profiles", "bing-only.yml")]
+]);
 const localDir = join(root, "local", "searxng");
 const settingsPath = join(localDir, "settings.yml");
 const envPath = join(root, ".env");
 
 function parseArgs(argv) {
-  const args = { port: "8080" };
+  const args = { port: "8080", profile: "default" };
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
     if (value === "--apply") args.apply = true;
     else if (value === "--force") args.force = true;
     else if (value === "--start") args.start = true;
     else if (value === "--port") args.port = argv[++index];
+    else if (value === "--profile") args.profile = argv[++index];
     else if (value === "--help" || value === "-h") args.help = true;
     else throw new Error(`Unknown argument: ${value}`);
   }
@@ -29,15 +34,16 @@ function parseArgs(argv) {
 
 function usage() {
   return [
-    "Usage: node scripts/setup-searxng-local.mjs [--port 8080] [--apply] [--start] [--force]",
+    "Usage: node scripts/setup-searxng-local.mjs [--profile default|bing-only] [--port 8080] [--apply] [--start] [--force]",
     "",
     "Dry-run is the default. Add --apply to write ignored local files.",
     "Add --start with --apply to run docker compose up -d.",
     "",
     "Examples:",
     "  npm run setup:searxng",
+    "  npm run setup:searxng -- --profile bing-only",
     "  npm run setup:searxng -- --apply",
-    "  npm run setup:searxng -- --apply --start"
+    "  npm run setup:searxng -- --profile bing-only --apply --start"
   ].join("\n");
 }
 
@@ -47,8 +53,9 @@ function validatePort(port) {
   if (value < 1 || value > 65535) throw new Error("--port must be between 1 and 65535.");
 }
 
-function renderSettings() {
+function renderSettings(profile) {
   const secret = randomBytes(32).toString("hex");
+  const templatePath = profiles.get(profile);
   const template = readFileSync(templatePath, "utf8");
   return template.replace("__SEARXNG_SECRET_KEY__", secret);
 }
@@ -81,8 +88,12 @@ function main() {
   }
 
   validatePort(args.port);
+  if (!profiles.has(args.profile)) {
+    throw new Error(`Unknown profile: ${args.profile}. Available profiles: ${Array.from(profiles.keys()).join(", ")}`);
+  }
 
   console.log("setup-searxng-local:");
+  console.log(`  profile:  ${args.profile}`);
   console.log(`  settings: ${settingsPath}`);
   console.log(`  env:      ${envPath}`);
   console.log(`  url:      http://127.0.0.1:${args.port}`);
@@ -98,7 +109,7 @@ function main() {
   }
 
   mkdirSync(localDir, { recursive: true });
-  writeFileSync(settingsPath, renderSettings());
+  writeFileSync(settingsPath, renderSettings(args.profile));
   writeFileSync(envPath, renderEnv(args.port));
   console.log("Wrote ignored local SearXNG files.");
 

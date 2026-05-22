@@ -24,6 +24,12 @@ Preview the local files that would be created:
 make setup-searxng
 ```
 
+Preview a region-appropriate engine profile when the default profile does not return results in your region:
+
+```sh
+make setup-searxng PROFILE=bing-only
+```
+
 Expected output:
 
 - target settings path
@@ -37,6 +43,12 @@ Write ignored local files:
 
 ```sh
 npm run setup:searxng -- --apply
+```
+
+Use a specific profile:
+
+```sh
+npm run setup:searxng -- --profile bing-only --apply
 ```
 
 This creates:
@@ -62,18 +74,25 @@ Or create local config and start in one command:
 npm run setup:searxng -- --apply --start
 ```
 
+Start with a specific profile:
+
+```sh
+npm run setup:searxng -- --profile bing-only --apply --start
+```
+
 If you need a different local port:
 
 ```sh
 npm run setup:searxng -- --port 8888 --apply --start
 ```
 
-## Verify JSON
+## Verify JSON And Search
 
 After the service starts:
 
 ```sh
-make verify-searxng URL=http://127.0.0.1:8080
+make verify-json URL=http://127.0.0.1:8080
+make verify-search URL=http://127.0.0.1:8080
 ```
 
 Expected result:
@@ -88,6 +107,8 @@ If verification fails:
 - check `docker compose logs searxng`
 - confirm `local/searxng/settings.yml` includes `search.formats` with `json`
 - confirm the port matches `.env`
+- if JSON works but search returns no results, choose a search engine profile that works in your region
+- use a longer timeout for slow first searches
 
 ## Connect Claude Code
 
@@ -136,4 +157,5 @@ Review paths before deleting.
 
 - The compose file uses `searxng/searxng:latest` for starter simplicity. Pin an image tag before using this in a controlled team environment.
 - Keep the local endpoint private unless you intentionally expose it.
+- A local SearXNG endpoint still sends queries to the selected upstream search engines.
 - Do not paste private repository context into search queries.

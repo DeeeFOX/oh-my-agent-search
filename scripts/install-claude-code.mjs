@@ -26,6 +26,8 @@ function parseArgs(argv) {
     else if (value === "--apply") args.apply = true;
     else if (value === "--allow-project-scope") args.allowProjectScope = true;
     else if (value === "--check-first") args.checkFirst = true;
+    else if (value === "--retries") args.retries = argv[++index];
+    else if (value === "--retry-delay-ms") args.retryDelayMs = argv[++index];
     else if (value === "--timeout-ms") args.timeoutMs = argv[++index];
     else if (value === "--help" || value === "-h") args.help = true;
     else throw new Error(`Unknown argument: ${value}`);
@@ -65,12 +67,12 @@ function buildClaudeArgs(args) {
   return [
     "mcp",
     "add",
-    "--transport",
-    "stdio",
-    "--scope",
+    "-s",
     args.scope,
-    "--env",
+    "-e",
     `SEARXNG_URL=${args.url}`,
+    "-t",
+    "stdio",
     args.serverName,
     "--",
     "npx",
@@ -87,6 +89,8 @@ function runPrecheck(args) {
   const script = join(here, "verify-searxng-json.mjs");
   const verifyArgs = [script, "--url", args.url];
   if (args.timeoutMs) verifyArgs.push("--timeout-ms", args.timeoutMs);
+  if (args.retries) verifyArgs.push("--retries", args.retries);
+  if (args.retryDelayMs) verifyArgs.push("--retry-delay-ms", args.retryDelayMs);
 
   const result = spawnSync(process.execPath, verifyArgs, { stdio: "inherit" });
   if (result.error) throw result.error;

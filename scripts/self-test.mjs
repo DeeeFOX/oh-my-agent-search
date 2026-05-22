@@ -29,7 +29,7 @@ function testDryRun() {
   const result = run([installScript, "--url", "https://search.example.org"]);
   assert(result.status === 0, "dry-run should succeed");
   assert(includes(result, "install-claude-code: dry-run"), "dry-run label missing");
-  assert(includes(result, "claude mcp add --transport stdio --scope local"), "claude command missing");
+  assert(includes(result, "claude mcp add -s local -e SEARXNG_URL=https://search.example.org -t stdio searxng"), "claude command missing or malformed");
 }
 
 function testProjectScopeGuard() {
@@ -48,7 +48,7 @@ function testProjectScopeOverrideDryRun() {
     "--allow-project-scope"
   ]);
   assert(result.status === 0, "project scope override dry-run should succeed");
-  assert(includes(result, "--scope project"), "project scope command missing");
+  assert(includes(result, "-s project"), "project scope command missing");
 }
 
 function testInvalidUrl() {
@@ -69,6 +69,18 @@ function testSetupDryRun() {
   assert(includes(result, "Dry-run only"), "setup dry-run label missing");
 }
 
+function testSetupProfileDryRun() {
+  const result = run([setupScript, "--profile", "bing-only"]);
+  assert(result.status === 0, "setup profile dry-run should succeed");
+  assert(includes(result, "profile:  bing-only"), "setup profile label missing");
+}
+
+function testUnknownSetupProfile() {
+  const result = run([setupScript, "--profile", "unknown"]);
+  assert(result.status !== 0, "unknown setup profile should fail");
+  assert(includes(result, "Unknown profile"), "unknown profile message missing");
+}
+
 function testUninstallDryRun() {
   const result = run([uninstallScript]);
   assert(result.status === 0, "uninstall dry-run should succeed");
@@ -82,6 +94,8 @@ const tests = [
   testInvalidUrl,
   testVerifyHelp,
   testSetupDryRun,
+  testSetupProfileDryRun,
+  testUnknownSetupProfile,
   testUninstallDryRun
 ];
 

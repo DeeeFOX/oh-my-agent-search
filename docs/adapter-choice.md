@@ -5,7 +5,7 @@
 The starter currently generates this Claude Code MCP command:
 
 ```sh
-claude mcp add --transport stdio --scope local --env SEARXNG_URL=https://search.example.org searxng -- npx -y mcp-searxng
+claude mcp add -s local -e SEARXNG_URL=https://search.example.org -t stdio searxng -- npx -y mcp-searxng
 ```
 
 This makes `mcp-searxng` the first adapter path to verify, not a permanent endorsement.
