@@ -71,11 +71,11 @@ Install after reviewing the command:
 make install-apply-check URL="$SEARXNG_URL"
 ```
 
-Remove the Claude Code MCP server if needed:
+Run go-live checks:
 
 ```sh
-make uninstall-preview
-make uninstall-apply
+make status URL="$SEARXNG_URL"
+make verify-search URL="$SEARXNG_URL"
 ```
 
 Verify Claude Code sees the server:
@@ -92,6 +92,15 @@ Inside Claude Code, run:
 ```
 
 Then copy the instruction from [templates/claude-code-instruction.md](templates/claude-code-instruction.md) into your local project or session instructions.
+
+Use [templates/go-live-prompts.md](templates/go-live-prompts.md) to ask Claude Code to verify search behavior and lifecycle after installation.
+
+Remove the Claude Code MCP server if needed:
+
+```sh
+make uninstall-preview
+make uninstall-apply
+```
 
 ## Safety Model
 
@@ -112,10 +121,12 @@ Prefer `local` or `user` MCP scope. Use `project` scope only after reviewing the
 npm run doctor
 npm run setup:searxng
 npm run setup:searxng -- --apply --start
+npm run status -- --url "$SEARXNG_URL"
 npm run install:claude-code -- --url https://search.example.org
 npm run install:claude-code -- --url https://search.example.org --apply
 npm run uninstall:claude-code
 make doctor
+make status URL="$SEARXNG_URL"
 make setup-searxng
 make install-preview URL=https://search.example.org
 make install-apply URL=https://search.example.org
@@ -139,17 +150,21 @@ make install-apply-check URL="$SEARXNG_URL"
 
 - [docs/adapter-choice.md](docs/adapter-choice.md) - current adapter default and replacement criteria.
 - [docs/claude-code.md](docs/claude-code.md) - Claude Code setup and verification.
+- [docs/go-live-checklist.md](docs/go-live-checklist.md) - post-install acceptance checks.
 - [docs/local-searxng.md](docs/local-searxng.md) - local Docker Compose SearXNG setup.
+- [docs/post-install.md](docs/post-install.md) - lifecycle, scope, restart, and removal behavior.
 - [docs/privacy-reality.md](docs/privacy-reality.md) - real privacy boundaries of local SearXNG and MCP search.
 - [docs/research-to-starter.md](docs/research-to-starter.md) - how research findings become installable starter artifacts.
 - [docs/searxng.md](docs/searxng.md) - SearXNG endpoint requirements.
 - [docs/security.md](docs/security.md) - privacy and MCP safety guidance.
 - [docs/troubleshooting.md](docs/troubleshooting.md) - sanitized field lessons and common setup fixes.
 - [templates/claude-code-instruction.md](templates/claude-code-instruction.md) - local instruction template.
+- [templates/go-live-prompts.md](templates/go-live-prompts.md) - prompts for Claude Code self-testing after installation.
 - [templates/mcp-server.json](templates/mcp-server.json) - project-scope MCP template using environment expansion.
 - [scripts/doctor.mjs](scripts/doctor.mjs) - local readiness checks.
 - [scripts/setup-searxng-local.mjs](scripts/setup-searxng-local.mjs) - dry-run-first local SearXNG setup.
 - [scripts/self-test.mjs](scripts/self-test.mjs) - offline tests for installer guards and dry-run output.
+- [scripts/status.mjs](scripts/status.mjs) - post-install status summary.
 - [scripts/uninstall-claude-code.mjs](scripts/uninstall-claude-code.mjs) - dry-run-first Claude Code MCP removal.
 - [scripts/verify-searxng-json.mjs](scripts/verify-searxng-json.mjs) - direct SearXNG JSON smoke test.
 - [scripts/install-claude-code.mjs](scripts/install-claude-code.mjs) - dry-run-first Claude Code MCP installer.

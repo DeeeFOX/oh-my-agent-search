@@ -33,6 +33,7 @@ Avoid `project` scope until the team has reviewed the exact `.mcp.json` and endp
 9. Open `/mcp` inside Claude Code.
 10. Run a public-safe smoke test.
 11. Run a negative test for private-context leakage.
+12. Run the [Go-Live Checklist](go-live-checklist.md).
 
 ## Smoke Test
 

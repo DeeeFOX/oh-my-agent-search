@@ -48,6 +48,7 @@ Use this repository to execute the chosen path.
 | Adapter choice must remain reviewable. | [docs/adapter-choice.md](adapter-choice.md) and `make install-preview`. |
 | Installers should fail before mutation when endpoint setup is broken. | `--check-first`, `make install-preview-check`, and `make install-apply-check`. |
 | Engine availability varies by region. | [docs/troubleshooting.md](troubleshooting.md) and engine profiles under [templates/searxng/profiles](../templates/searxng/profiles). |
+| Installation needs a lifecycle and go-live handoff. | [docs/post-install.md](post-install.md), [docs/go-live-checklist.md](go-live-checklist.md), [templates/go-live-prompts.md](../templates/go-live-prompts.md), and `make status`. |
 
 ## Installation Content Extraction Rules
 

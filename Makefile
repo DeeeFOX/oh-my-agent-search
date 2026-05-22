@@ -5,7 +5,7 @@ TIMEOUT_MS ?= 30000
 RETRIES ?= 2
 RETRY_DELAY_MS ?= 3000
 
-.PHONY: check doctor install-apply install-apply-check install-preview install-preview-check review self-test setup-searxng setup-searxng-start uninstall-apply uninstall-preview verify-json verify-search verify-searxng
+.PHONY: check doctor go-live install-apply install-apply-check install-preview install-preview-check review self-test setup-searxng setup-searxng-start status uninstall-apply uninstall-preview verify-json verify-search verify-searxng
 
 check:
 	npm test
@@ -16,6 +16,9 @@ doctor:
 self-test:
 	npm run self-test
 
+status:
+	npm run status -- --url "$(URL)"
+
 verify-json:
 	npm run verify:searxng -- --url "$(URL)" --min-results 0 --timeout-ms "$(TIMEOUT_MS)"
 
@@ -23,6 +26,8 @@ verify-search:
 	npm run verify:searxng -- --url "$(URL)" --min-results 1 --timeout-ms "$(TIMEOUT_MS)" --retries "$(RETRIES)" --retry-delay-ms "$(RETRY_DELAY_MS)"
 
 verify-searxng: verify-search
+
+go-live: status verify-search
 
 install-preview:
 	npm run install:claude-code -- --url "$(URL)" --scope "$(SCOPE)"

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const installScript = join(here, "install-claude-code.mjs");
 const setupScript = join(here, "setup-searxng-local.mjs");
+const statusScript = join(here, "status.mjs");
 const uninstallScript = join(here, "uninstall-claude-code.mjs");
 const verifyScript = join(here, "verify-searxng-json.mjs");
 
@@ -87,6 +88,12 @@ function testUninstallDryRun() {
   assert(includes(result, "claude mcp remove searxng"), "uninstall command missing");
 }
 
+function testStatusHelp() {
+  const result = run([statusScript, "--help"]);
+  assert(result.status === 0, "status help should succeed");
+  assert(includes(result, "Usage:"), "status help usage missing");
+}
+
 const tests = [
   testDryRun,
   testProjectScopeGuard,
@@ -96,6 +103,7 @@ const tests = [
   testSetupDryRun,
   testSetupProfileDryRun,
   testUnknownSetupProfile,
+  testStatusHelp,
   testUninstallDryRun
 ];
 
