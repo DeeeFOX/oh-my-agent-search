@@ -4,9 +4,13 @@ English | [中文](README.zh-CN.md)
 
 [![Check](https://github.com/DeeeFOX/oh-my-agent-search/actions/workflows/check.yml/badge.svg)](https://github.com/DeeeFOX/oh-my-agent-search/actions/workflows/check.yml)
 
+Claude Code MCP SearXNG search starter for privacy-aware, self-hosted-friendly agent search.
+
 A self-contained, self-hosted-friendly SearXNG search starter for Claude Code through MCP.
 
-Use this repository when you want Claude Code to search through a trusted SearXNG endpoint without committing private endpoints, changing MCP config by accident, or relying on random public search instances.
+Use this repository to add SearXNG search to Claude Code through a trusted or self-hosted SearXNG endpoint without committing private endpoints, changing MCP config by accident, or relying on random public search instances.
+
+It focuses on Claude Code MCP search setup with dry-run install, local MCP scope by default, optional user MCP scope, endpoint verification, and public-safe search prompts.
 
 ## Why This Exists
 
@@ -144,6 +148,12 @@ npm --silent run status -- --url "$SEARXNG_URL" --json
 ## Docs
 
 Start with [docs/README.md](docs/README.md).
+
+Discovery-focused guides:
+
+- [FAQ](docs/faq.md) - short answers for common Claude Code MCP search setup questions.
+- [Comparison](docs/comparison.md) - how this starter differs from generic SearXNG MCP servers.
+- [Local-first example](docs/examples/local-first.md) - one complete local SearXNG to Claude Code walkthrough.
 
 Before submitting changes:
 

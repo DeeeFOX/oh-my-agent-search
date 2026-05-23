@@ -19,5 +19,11 @@ Use these docs in order.
 - [Security guidance](security.md) - query privacy and MCP scope.
 - [Agent runbook](agent-runbook.md) - JSON commands and automation flow.
 - [Adapter choice](adapter-choice.md) - current MCP adapter command.
-- [Exposure checklist](exposure.md) - GitHub metadata, social preview, and promotion copy.
 - [Contributing guide](../CONTRIBUTING.md) - contribution boundaries and required checks.
+
+## Discovery
+
+- [FAQ](faq.md) - short answers for common Claude Code MCP search questions.
+- [Comparison](comparison.md) - this starter compared with generic SearXNG MCP servers.
+- [Local-first example](examples/local-first.md) - full local SearXNG to Claude Code walkthrough.
+- [Exposure plan](exposure.md) - GitHub metadata, social preview, release, and promotion copy.

@@ -4,9 +4,13 @@
 
 [![Check](https://github.com/DeeeFOX/oh-my-agent-search/actions/workflows/check.yml/badge.svg)](https://github.com/DeeeFOX/oh-my-agent-search/actions/workflows/check.yml)
 
+面向 Claude Code MCP search 的 SearXNG 安装与验证 starter，适合接入自托管或可信的 SearXNG endpoint。
+
 一个 self-contained、self-hosted-friendly 的 SearXNG search starter，通过 MCP 为 Claude Code 接入搜索。
 
-当你希望 Claude Code 通过可信 SearXNG endpoint 搜索，同时避免提交私有 endpoint、误改 MCP 配置，或依赖随机公开搜索实例时，可以使用这个仓库。
+当你希望为 Claude Code 添加 SearXNG search，同时避免提交私有 endpoint、误改 MCP 配置，或依赖随机公开搜索实例时，可以使用这个仓库。
+
+它聚焦 Claude Code MCP search 安装：默认使用 `local` MCP scope，支持 `user` MCP scope，先验证 endpoint，再用 public-safe prompts 做上线前检查。
 
 ## 为什么需要它
 
@@ -144,6 +148,12 @@ npm --silent run status -- --url "$SEARXNG_URL" --json
 ## 文档
 
 从 [docs/README.md](docs/README.md) 开始。
+
+面向发现和评估的文档：
+
+- [FAQ](docs/faq.md)：回答常见 Claude Code MCP search 安装问题。
+- [对比说明](docs/comparison.md)：说明它和通用 SearXNG MCP server 的区别。
+- [Local-first 示例](docs/examples/local-first.md)：从本地 SearXNG 到 Claude Code 的完整流程。
 
 提交变更前运行：
 

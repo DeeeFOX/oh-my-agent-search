@@ -6,15 +6,21 @@
   "keywords": [
     "claude-code",
     "mcp",
+    "mcp-tools",
     "model-context-protocol",
     "searxng",
+    "searxng-mcp",
     "self-hosted",
+    "self-hosted-search",
     "search",
+    "search-engine",
     "privacy",
     "ai-agents",
     "agent-tools",
     "developer-tools",
-    "local-first"
+    "local-first",
+    "nodejs",
+    "open-source"
   ],
   "homepage": "https://github.com/DeeeFOX/oh-my-agent-search#readme",
   "bugs": {
