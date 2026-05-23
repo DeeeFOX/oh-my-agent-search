@@ -1,167 +1,93 @@
 # Local SearXNG Setup
 
-## Goal
+Use this when you do not have a trusted SearXNG endpoint yet.
 
-Start a local SearXNG instance for Claude Code search testing when no trusted endpoint is available yet.
+## What It Creates
 
-This path is for local development. For shared or production use, review [deployment hardening](deployment-hardening.md).
+- `.env`
+- `local/searxng/settings.yml`
 
-## Safety Defaults
+Both files are ignored by git. The default endpoint is `http://127.0.0.1:8080`.
 
-The provided Docker Compose file:
+The generated SearXNG settings enable `html` and `json` output.
 
-- binds SearXNG to `127.0.0.1:8080` by default
-- stores generated local configuration under ignored `local/`
-- writes a generated local `server.secret_key`
-- enables `html` and `json` search formats
-- does not configure random public-instance fallback
-
-## Dry Run
-
-Preview the local files that would be created:
+## Preview
 
 ```sh
 make setup-searxng
 ```
 
-For agent-assisted setup, use machine-readable output:
+JSON output for agents:
 
 ```sh
 npm --silent run setup:searxng -- --json
 ```
 
-Preview a region-appropriate engine profile when the default profile does not return results in your region:
+If the default engines do not work in your region, probe candidate engines first.
+
+Start with a candidate set:
 
 ```sh
-make setup-searxng PROFILE=bing-only
+npm run setup:searxng -- --engines bing,yandex,google,baidu --apply --force --start
+make probe-engines URL=http://127.0.0.1:8080
 ```
 
-Expected output:
-
-- target settings path
-- target `.env` path
-- local URL
-- dry-run note
-
-## Create Local Config
-
-Write ignored local files:
+Then enable all engines that passed:
 
 ```sh
-npm run setup:searxng -- --apply
+npm run setup:searxng -- --engines bing,yandex --apply --force --start
+make verify-search URL=http://127.0.0.1:8080
 ```
 
-Use a specific profile:
-
-```sh
-npm run setup:searxng -- --profile bing-only --apply
-```
-
-This creates:
-
-```text
-.env
-local/searxng/settings.yml
-```
-
-Both are ignored by git. Do not commit generated local settings.
-
-## Start SearXNG
-
-Start with Docker Compose:
-
-```sh
-docker compose up -d
-```
-
-Or create local config and start in one command:
+## Create And Start
 
 ```sh
 npm run setup:searxng -- --apply --start
+export SEARXNG_URL="http://127.0.0.1:8080"
 ```
 
-Start with a specific profile:
+Single-engine profiles are fallback probes:
 
 ```sh
 npm run setup:searxng -- --profile bing-only --apply --start
 ```
 
-If you need a different local port:
+With another local port:
 
 ```sh
 npm run setup:searxng -- --port 8888 --apply --start
 ```
 
-## Verify JSON And Search
-
-After the service starts:
+## Verify
 
 ```sh
-make verify-json URL=http://127.0.0.1:8080
-make verify-search URL=http://127.0.0.1:8080
+make verify-json URL="$SEARXNG_URL"
+make verify-search URL="$SEARXNG_URL"
 ```
 
-Expected result:
-
-```text
-verify-searxng-json: ok
-```
-
-If verification fails:
-
-- check `docker compose ps`
-- check `docker compose logs searxng`
-- confirm `local/searxng/settings.yml` includes `search.formats` with `json`
-- confirm the port matches `.env`
-- if JSON works but search returns no results, choose a search engine profile that works in your region
-- use a longer timeout for slow first searches
-
-## Connect Claude Code
-
-After JSON verification:
+Then connect Claude Code:
 
 ```sh
-make install-preview-check URL=http://127.0.0.1:8080
-make install-apply-check URL=http://127.0.0.1:8080
+make install-preview-check URL="$SEARXNG_URL"
+make install-apply-check URL="$SEARXNG_URL"
 ```
 
-Then verify:
+## Stop Or Reset
 
-```sh
-claude mcp list
-claude mcp get searxng
-```
-
-Inside Claude Code:
-
-```text
-/mcp
-```
-
-## Stop Local SearXNG
+Stop the service:
 
 ```sh
 docker compose down
 ```
 
-This does not remove generated local configuration.
-
-## Reset Local Config
-
-Generated files are ignored under `local/` and `.env`.
-
-To reset manually:
+Remove generated local config after review:
 
 ```sh
-docker compose down
 rm -rf local/searxng .env
 ```
 
-Review paths before deleting.
-
 ## Notes
 
-- The compose file uses `searxng/searxng:latest` for starter simplicity. Pin an image tag before using this in a controlled team environment.
-- Keep the local endpoint private unless you intentionally expose it.
-- A local SearXNG endpoint still sends queries to the selected upstream search engines.
-- Do not paste private repository context into search queries.
+- The compose file binds to `127.0.0.1` by default.
+- Local SearXNG still sends public-safe queries to selected upstream search engines.
+- Pin the SearXNG image tag before using this in a controlled team environment.

@@ -1,34 +1,20 @@
 # Agent Guide
 
-## Mission
-
 Help users add privacy-aware SearXNG search to Claude Code through MCP.
 
-## Scope
+This repository is an installable starter, not a general search-agent catalog.
 
-This repository is an installable starter, not a general awesome list.
+## Rules
 
-Agents may update:
+- Do not commit secrets, credentials, cookies, session material, private endpoints, private proxy values, personal emails, customer data, or local absolute paths.
+- Keep installers dry-run by default.
+- Require `--apply` for MCP config changes.
+- Require explicit `--scope` for uninstall apply.
+- Prefer `local` or `user` scope.
+- Use `project` scope only after reviewing shared config.
+- Use JSON output for automation instead of scraping human-readable text.
 
-- setup docs
-- templates
-- verification scripts
-- dry-run installers
-- security guidance
-- compatibility notes
-
-Agents must not add:
-
-- secrets
-- tokens
-- cookies
-- session material
-- personal email addresses
-- private endpoints
-- local absolute paths
-- private proxy values
-
-## Required Checks
+## Checks
 
 Run:
 
@@ -41,28 +27,3 @@ For endpoint-specific work, also run:
 ```sh
 make verify-search URL="$SEARXNG_URL"
 ```
-
-Use a real endpoint only in local commands. Do not commit it.
-
-When an agent or script needs to parse command output, use documented `--json` flags with `npm --silent run` or direct `node scripts/...` commands instead of scraping human-readable status text.
-
-## Safety Rules
-
-- Default installers to dry-run.
-- Require `--apply` for commands that modify Claude Code MCP configuration.
-- Prefer `local` or `user` MCP scope.
-- Require explicit confirmation before using `project` scope.
-- Require explicit confirmation before overwriting generated local files with `--force`.
-- Never auto-write `.mcp.json` with a real endpoint.
-- Keep URL reading separate from search.
-- Do not recommend random public SearXNG instances for durable workflows.
-
-## Submission Rules
-
-Every substantial change should state:
-
-- problem
-- approach
-- expected benefit
-- privacy considerations
-- verification performed

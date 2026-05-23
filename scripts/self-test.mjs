@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
 const installScript = join(here, "install-claude-code.mjs");
+const probeScript = join(here, "probe-searxng-engines.mjs");
 const setupScript = join(here, "setup-searxng-local.mjs");
 const statusScript = join(here, "status.mjs");
 const uninstallScript = join(here, "uninstall-claude-code.mjs");
@@ -45,7 +46,7 @@ function testDryRun() {
   const result = run([installScript, "--url", "https://search.example.org"]);
   assert(result.status === 0, "dry-run should succeed");
   assert(includes(result, "install-claude-code: dry-run"), "dry-run label missing");
-  assert(includes(result, "claude mcp add -s local -e SEARXNG_URL=https://search.example.org -t stdio searxng"), "claude command missing or malformed");
+  assert(includes(result, "claude mcp add --scope local -e SEARXNG_URL=https://search.example.org -t stdio searxng"), "claude command missing or malformed");
 }
 
 function testInstallJsonDryRun() {
@@ -55,6 +56,7 @@ function testInstallJsonDryRun() {
   assert(payload.ok === true, "install json dry-run should be ok");
   assert(payload.mode === "dry-run", "install json dry-run mode missing");
   assert(payload.command.includes("claude mcp add"), "install json command missing");
+  assert(Array.isArray(payload.warnings), "install json warnings missing");
 }
 
 function testNpmSilentJsonDryRun() {
@@ -90,7 +92,7 @@ function testProjectScopeOverrideDryRun() {
     "--allow-project-scope"
   ]);
   assert(result.status === 0, "project scope override dry-run should succeed");
-  assert(includes(result, "-s project"), "project scope command missing");
+  assert(includes(result, "--scope project"), "project scope command missing");
 }
 
 function testInvalidUrl() {
@@ -111,6 +113,28 @@ function testVerifyHelp() {
   const result = run([verifyScript, "--help"]);
   assert(result.status === 0, "verify help should succeed");
   assert(includes(result, "Usage:"), "verify help usage missing");
+}
+
+function testProbeHelp() {
+  const result = run([probeScript, "--help"]);
+  assert(result.status === 0, "probe help should succeed");
+  assert(includes(result, "Usage:"), "probe help usage missing");
+}
+
+function testProbeJsonError() {
+  const result = run([probeScript, "--url", "file:///tmp/search", "--json"]);
+  assert(result.status !== 0, "probe json error should fail");
+  const payload = parseJson(result);
+  assert(payload.ok === false, "probe json error should be false");
+  assert(payload.error.includes("must use http or https"), "probe json error message missing");
+}
+
+function testProbeUnknownEngine() {
+  const result = run([probeScript, "--url", "https://search.example.org", "--engines", "bing,unknown", "--json"]);
+  assert(result.status !== 0, "unknown probe engine should fail");
+  const payload = parseJson(result);
+  assert(payload.ok === false, "unknown probe engine json should be false");
+  assert(payload.error.includes("Unknown engine"), "unknown probe engine message missing");
 }
 
 function testSetupDryRun() {
@@ -134,16 +158,44 @@ function testSetupProfileDryRun() {
   assert(includes(result, "profile:  bing-only"), "setup profile label missing");
 }
 
+function testSetupRegionProfilesDryRun() {
+  for (const profile of ["yandex-only", "google-only", "baidu-only"]) {
+    const result = run([setupScript, "--profile", profile, "--json"]);
+    assert(result.status === 0, `${profile} setup json dry-run should succeed`);
+    const payload = parseJson(result);
+    assert(payload.ok === true, `${profile} setup json dry-run should be ok`);
+    assert(payload.profile === profile, `${profile} setup json profile missing`);
+  }
+}
+
+function testSetupEnginesJsonDryRun() {
+  const result = run([setupScript, "--engines", "bing,yandex", "--json"]);
+  assert(result.status === 0, "setup engines json dry-run should succeed");
+  const payload = parseJson(result);
+  assert(payload.ok === true, "setup engines json dry-run should be ok");
+  assert(payload.profile === "custom", "setup engines json profile should be custom");
+  assert(Array.isArray(payload.engines), "setup engines json engines missing");
+  assert(payload.engines.join(",") === "bing,yandex", "setup engines json engines malformed");
+}
+
+function testSetupUnknownEngine() {
+  const result = run([setupScript, "--engines", "bing,unknown"]);
+  assert(result.status !== 0, "unknown setup engine should fail");
+  assert(includes(result, "Unknown engine"), "unknown setup engine message missing");
+}
+
 function testUnknownSetupProfile() {
   const result = run([setupScript, "--profile", "unknown"]);
   assert(result.status !== 0, "unknown setup profile should fail");
   assert(includes(result, "Unknown profile"), "unknown profile message missing");
+  assert(includes(result, "baidu-only"), "unknown profile message should list region profiles");
 }
 
 function testUninstallDryRun() {
   const result = run([uninstallScript]);
   assert(result.status === 0, "uninstall dry-run should succeed");
   assert(includes(result, "claude mcp remove searxng"), "uninstall command missing");
+  assert(includes(result, "WARN:"), "unscoped uninstall warning missing");
 }
 
 function testStatusHelp() {
@@ -166,6 +218,25 @@ function testUninstallJsonDryRun() {
   const payload = parseJson(result);
   assert(payload.ok === true, "uninstall json dry-run should be ok");
   assert(payload.command.includes("claude mcp remove"), "uninstall json command missing");
+  assert(Array.isArray(payload.warnings), "uninstall json warnings missing");
+  assert(payload.warnings.length === 1, "unscoped uninstall should warn");
+}
+
+function testUninstallScopedJsonDryRun() {
+  const result = run([uninstallScript, "--scope", "user", "--json"]);
+  assert(result.status === 0, "scoped uninstall json dry-run should succeed");
+  const payload = parseJson(result);
+  assert(payload.ok === true, "scoped uninstall json dry-run should be ok");
+  assert(payload.scope === "user", "scoped uninstall json scope missing");
+  assert(payload.command.includes("claude mcp remove --scope user searxng"), "scoped uninstall json command missing");
+  assert(Array.isArray(payload.warnings), "scoped uninstall json warnings missing");
+  assert(payload.warnings.length === 0, "scoped uninstall should not warn");
+}
+
+function testUninstallApplyRequiresScope() {
+  const result = run([uninstallScript, "--apply"]);
+  assert(result.status !== 0, "uninstall apply should require scope");
+  assert(includes(result, "Missing --scope"), "uninstall apply scope guidance missing");
 }
 
 const tests = [
@@ -177,14 +248,22 @@ const tests = [
   testInvalidUrl,
   testVerifyJsonError,
   testVerifyHelp,
+  testProbeHelp,
+  testProbeJsonError,
+  testProbeUnknownEngine,
   testSetupDryRun,
   testSetupJsonDryRun,
   testSetupProfileDryRun,
+  testSetupRegionProfilesDryRun,
+  testSetupEnginesJsonDryRun,
+  testSetupUnknownEngine,
   testUnknownSetupProfile,
   testStatusHelp,
   testStatusJsonError,
   testUninstallDryRun,
-  testUninstallJsonDryRun
+  testUninstallJsonDryRun,
+  testUninstallScopedJsonDryRun,
+  testUninstallApplyRequiresScope
 ];
 
 try {

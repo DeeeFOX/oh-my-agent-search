@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const DEFAULT_PACKAGE = "mcp-searxng";
 const DEFAULT_SERVER_NAME = "searxng";
+const EXISTING_SERVER_TIMEOUT_MS = 3000;
 const VALID_SCOPES = new Set(["local", "user", "project"]);
 const TOOL_NAME = "install-claude-code";
 const here = dirname(fileURLToPath(import.meta.url));
@@ -45,10 +46,10 @@ function usage() {
     "Dry-run is the default. Add --apply to run claude mcp add.",
     "",
     "Examples:",
-    "  npm run install:claude-code -- --url https://search.example.org",
-    "  npm run install:claude-code -- --url https://search.example.org --check-first",
-    "  npm run install:claude-code -- --url https://search.example.org --apply",
-    "  npm --silent run install:claude-code -- --url https://search.example.org --json"
+    "  npm run install:claude-code -- --url https://search.example.org --scope local",
+    "  npm run install:claude-code -- --url https://search.example.org --scope local --check-first",
+    "  npm run install:claude-code -- --url \"$SEARXNG_URL\" --scope local --apply",
+    "  npm --silent run install:claude-code -- --url \"$SEARXNG_URL\" --scope local --json"
   ].join("\n");
 }
 
@@ -70,7 +71,7 @@ function buildClaudeArgs(args) {
   return [
     "mcp",
     "add",
-    "-s",
+    "--scope",
     args.scope,
     "-e",
     `SEARXNG_URL=${args.url}`,
@@ -100,6 +101,38 @@ function parseJson(text) {
   } catch {
     return null;
   }
+}
+
+function readExistingServer(serverName) {
+  const result = spawnSync("claude", ["mcp", "get", serverName], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: EXISTING_SERVER_TIMEOUT_MS
+  });
+
+  if (result.error || result.status !== 0) {
+    return null;
+  }
+
+  const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
+  const scope = output.match(/Scope:\s*(.+)/)?.[1]?.trim();
+  const status = output.match(/Status:\s*(.+)/)?.[1]?.trim();
+
+  return {
+    serverName,
+    scope,
+    status
+  };
+}
+
+function buildWarnings(args, existingServer) {
+  const warnings = [];
+  if (existingServer) {
+    warnings.push(
+      `Claude Code already has an MCP server named '${args.serverName}'${existingServer.scope ? ` (${existingServer.scope})` : ""}. Confirm the intended scope before applying.`
+    );
+  }
+  return warnings;
 }
 
 function runPrecheck(args) {
@@ -154,6 +187,8 @@ async function main(args) {
 
   validateArgs(args);
   const precheck = args.checkFirst ? runPrecheck(args) : null;
+  const existingServer = readExistingServer(args.serverName);
+  const warnings = buildWarnings(args, existingServer);
 
   const claudeArgs = buildClaudeArgs(args);
   const command = formatCommand("claude", claudeArgs);
@@ -170,12 +205,17 @@ async function main(args) {
         url: args.url,
         checkFirst: Boolean(args.checkFirst),
         precheck,
+        existingServer,
+        warnings,
         command
       });
       return;
     }
 
     printHumanDryRun(command);
+    for (const warning of warnings) {
+      console.log(`WARN: ${warning}`);
+    }
     return;
   }
 
@@ -204,6 +244,8 @@ async function main(args) {
       url: args.url,
       checkFirst: Boolean(args.checkFirst),
       precheck,
+      existingServer,
+      warnings,
       command,
       nextChecks: [
         "claude mcp list",

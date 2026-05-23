@@ -26,9 +26,9 @@ function usage() {
     "Dry-run is the default. Add --apply to run claude mcp remove.",
     "",
     "Examples:",
-    "  npm run uninstall:claude-code",
-    "  npm run uninstall:claude-code -- --apply",
-    "  npm --silent run uninstall:claude-code -- --json"
+    "  npm run uninstall:claude-code -- --scope local",
+    "  npm run uninstall:claude-code -- --scope local --apply",
+    "  npm --silent run uninstall:claude-code -- --scope local --json"
   ].join("\n");
 }
 
@@ -37,6 +37,13 @@ function buildClaudeArgs(args) {
   if (args.scope) claudeArgs.push("--scope", args.scope);
   claudeArgs.push(args.serverName);
   return claudeArgs;
+}
+
+function buildWarnings(args) {
+  if (args.scope) return [];
+  return [
+    "No --scope specified; Claude Code will remove the server from whichever scope it finds. Pass --scope to be explicit."
+  ];
 }
 
 function formatCommand(command, args) {
@@ -55,9 +62,13 @@ function main(args) {
   if (args.scope && !VALID_SCOPES.has(args.scope)) {
     throw new Error(`Invalid scope: ${args.scope}`);
   }
+  if (args.apply && !args.scope) {
+    throw new Error("Missing --scope for apply. Pass --scope local, --scope user, or --scope project before removing a server.");
+  }
 
   const claudeArgs = buildClaudeArgs(args);
   const command = formatCommand("claude", claudeArgs);
+  const warnings = buildWarnings(args);
 
   if (!args.apply) {
     if (args.json) {
@@ -67,6 +78,7 @@ function main(args) {
         mode: "dry-run",
         serverName: args.serverName,
         scope: args.scope,
+        warnings,
         command
       });
       return;
@@ -74,6 +86,9 @@ function main(args) {
 
     console.log("uninstall-claude-code: dry-run");
     console.log(command);
+    for (const warning of warnings) {
+      console.log(`WARN: ${warning}`);
+    }
     console.log("");
     console.log("Re-run with --apply after reviewing the command.");
     return;
@@ -100,6 +115,7 @@ function main(args) {
       mode: "apply",
       serverName: args.serverName,
       scope: args.scope,
+      warnings,
       command
     });
   }

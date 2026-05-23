@@ -2,7 +2,7 @@ use_default_settings: true
 
 engines:
   - name: google
-    disabled: true
+    disabled: false
   - name: google images
     disabled: true
   - name: google news
@@ -16,7 +16,7 @@ engines:
   - name: startpage
     disabled: true
   - name: bing
-    disabled: false
+    disabled: true
   - name: bing images
     disabled: true
   - name: bing news

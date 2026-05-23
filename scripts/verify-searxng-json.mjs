@@ -143,7 +143,7 @@ async function main(args) {
     throw new Error("JSON response does not contain a results array.");
   }
   if (payload.results.length < minResults) {
-    throw new Error(`${lastError.message} Use a search engine profile that works in your region, increase timeout, or retry later.`);
+    throw new Error(`${lastError.message} Run probe:engines, enable all passing engines with setup:searxng -- --engines, increase timeout, or retry later.`);
   }
 
   if (args.json) {

@@ -12,8 +12,23 @@ const TOOL_NAME = "setup-searxng-local";
 const templateRoot = join(root, "templates", "searxng");
 const profiles = new Map([
   ["default", join(templateRoot, "settings.yml")],
-  ["bing-only", join(templateRoot, "profiles", "bing-only.yml")]
+  ["bing-only", join(templateRoot, "profiles", "bing-only.yml")],
+  ["yandex-only", join(templateRoot, "profiles", "yandex-only.yml")],
+  ["google-only", join(templateRoot, "profiles", "google-only.yml")],
+  ["baidu-only", join(templateRoot, "profiles", "baidu-only.yml")]
 ]);
+const managedEngines = ["bing", "yandex", "google", "baidu"];
+const disabledDefaultEngines = [
+  "google images",
+  "google news",
+  "google videos",
+  "duckduckgo",
+  "brave",
+  "startpage",
+  "bing images",
+  "bing news",
+  "bing videos"
+];
 const localDir = join(root, "local", "searxng");
 const settingsPath = join(localDir, "settings.yml");
 const envPath = join(root, ".env");
@@ -27,6 +42,7 @@ function parseArgs(argv) {
     else if (value === "--start") args.start = true;
     else if (value === "--port") args.port = argv[++index];
     else if (value === "--profile") args.profile = argv[++index];
+    else if (value === "--engines") args.engines = parseEngineList(argv[++index]);
     else if (value === "--json") args.json = true;
     else if (value === "--help" || value === "-h") args.help = true;
     else throw new Error(`Unknown argument: ${value}`);
@@ -35,19 +51,30 @@ function parseArgs(argv) {
 }
 
 function usage() {
+  const profileList = Array.from(profiles.keys()).join("|");
   return [
-    "Usage: node scripts/setup-searxng-local.mjs [--profile default|bing-only] [--port 8080] [--apply] [--start] [--force] [--json]",
+    `Usage: node scripts/setup-searxng-local.mjs [--profile ${profileList}] [--engines bing,yandex] [--port 8080] [--apply] [--start] [--force] [--json]`,
     "",
     "Dry-run is the default. Add --apply to write ignored local files.",
     "Add --start with --apply to run docker compose up -d.",
+    "Add --force only after reviewing existing local files.",
+    "Prefer --engines with all engines that passed probe:engines.",
+    "Single-engine profiles are fallback probes: bing-only, yandex-only, google-only, baidu-only.",
     "",
     "Examples:",
     "  npm run setup:searxng",
+    "  npm run setup:searxng -- --engines bing,yandex",
     "  npm run setup:searxng -- --profile bing-only",
+    "  npm run setup:searxng -- --profile yandex-only",
     "  npm run setup:searxng -- --apply",
     "  npm run setup:searxng -- --profile bing-only --apply --start",
     "  npm --silent run setup:searxng -- --json"
   ].join("\n");
+}
+
+function parseEngineList(value) {
+  if (!value) return [];
+  return value.split(",").map((engine) => engine.trim()).filter(Boolean);
 }
 
 function validatePort(port) {
@@ -56,10 +83,47 @@ function validatePort(port) {
   if (value < 1 || value > 65535) throw new Error("--port must be between 1 and 65535.");
 }
 
-function renderSettings(profile) {
+function renderEngineSettings(engines) {
+  const selected = new Set(engines);
+  const engineLines = [
+    ...managedEngines.map((name) => ({ name, disabled: !selected.has(name) })),
+    ...disabledDefaultEngines.map((name) => ({ name, disabled: true }))
+  ].map(({ name, disabled }) => `  - name: ${name}\n    disabled: ${disabled ? "true" : "false"}`);
+
+  return [
+    "use_default_settings: true",
+    "",
+    "engines:",
+    engineLines.join("\n"),
+    "",
+    "general:",
+    "  instance_name: \"oh-my-agent-search\"",
+    "",
+    "search:",
+    "  formats:",
+    "    - html",
+    "    - json",
+    "",
+    "server:",
+    "  bind_address: \"0.0.0.0\"",
+    "  port: 8080",
+    "  secret_key: \"__SEARXNG_SECRET_KEY__\"",
+    "  image_proxy: false",
+    "",
+    "ui:",
+    "  static_use_hash: true",
+    "",
+    "outgoing:",
+    "  request_timeout: 10.0",
+    ""
+  ].join("\n");
+}
+
+function renderSettings(args) {
   const secret = randomBytes(32).toString("hex");
-  const templatePath = profiles.get(profile);
-  const template = readFileSync(templatePath, "utf8");
+  const template = args.engines?.length
+    ? renderEngineSettings(args.engines)
+    : readFileSync(profiles.get(args.profile), "utf8");
   return template.replace("__SEARXNG_SECRET_KEY__", secret);
 }
 
@@ -99,6 +163,17 @@ function main(args) {
   }
 
   validatePort(args.port);
+  if (args.engines?.length && args.profile !== "default") {
+    throw new Error("Use either --engines or --profile, not both.");
+  }
+  if (args.engines?.length === 0) {
+    throw new Error("--engines must include at least one engine.");
+  }
+  for (const engine of args.engines ?? []) {
+    if (!managedEngines.includes(engine)) {
+      throw new Error(`Unknown engine: ${engine}. Available engines: ${managedEngines.join(", ")}`);
+    }
+  }
   if (!profiles.has(args.profile)) {
     throw new Error(`Unknown profile: ${args.profile}. Available profiles: ${Array.from(profiles.keys()).join(", ")}`);
   }
@@ -107,7 +182,8 @@ function main(args) {
   const summary = {
     ok: true,
     tool: TOOL_NAME,
-    profile: args.profile,
+    profile: args.engines?.length ? "custom" : args.profile,
+    engines: args.engines ?? null,
     port: Number(args.port),
     url,
     settingsPath: "local/searxng/settings.yml",
@@ -126,7 +202,8 @@ function main(args) {
     }
   } else {
     console.log("setup-searxng-local:");
-    console.log(`  profile:  ${args.profile}`);
+    console.log(`  profile:  ${summary.profile}`);
+    if (args.engines?.length) console.log(`  engines:  ${args.engines.join(",")}`);
     console.log(`  settings: ${settingsPath}`);
     console.log(`  env:      ${envPath}`);
     console.log(`  url:      ${url}`);
@@ -145,7 +222,7 @@ function main(args) {
   }
 
   mkdirSync(localDir, { recursive: true });
-  writeFileSync(settingsPath, renderSettings(args.profile));
+  writeFileSync(settingsPath, renderSettings(args));
   writeFileSync(envPath, renderEnv(args.port));
   if (args.json) {
     const payload = {

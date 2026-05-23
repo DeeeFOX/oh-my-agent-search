@@ -5,9 +5,10 @@
   "description": "Installable starter for adding privacy-aware SearXNG search to Claude Code through MCP.",
   "type": "module",
   "scripts": {
-    "check": "node --check scripts/doctor.mjs && node --check scripts/install-claude-code.mjs && node --check scripts/self-test.mjs && node --check scripts/setup-searxng-local.mjs && node --check scripts/status.mjs && node --check scripts/uninstall-claude-code.mjs && node --check scripts/verify-searxng-json.mjs",
+    "check": "node --check scripts/doctor.mjs && node --check scripts/install-claude-code.mjs && node --check scripts/probe-searxng-engines.mjs && node --check scripts/self-test.mjs && node --check scripts/setup-searxng-local.mjs && node --check scripts/status.mjs && node --check scripts/uninstall-claude-code.mjs && node --check scripts/verify-searxng-json.mjs",
     "doctor": "node scripts/doctor.mjs",
     "install:claude-code": "node scripts/install-claude-code.mjs",
+    "probe:engines": "node scripts/probe-searxng-engines.mjs",
     "review": "npm test && npm run doctor",
     "self-test": "node scripts/self-test.mjs",
     "setup:searxng": "node scripts/setup-searxng-local.mjs",

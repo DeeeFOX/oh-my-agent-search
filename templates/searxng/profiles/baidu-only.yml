@@ -16,7 +16,7 @@ engines:
   - name: startpage
     disabled: true
   - name: bing
-    disabled: false
+    disabled: true
   - name: bing images
     disabled: true
   - name: bing news
@@ -26,7 +26,7 @@ engines:
   - name: yandex
     disabled: true
   - name: baidu
-    disabled: true
+    disabled: false
 
 general:
   instance_name: "oh-my-agent-search"

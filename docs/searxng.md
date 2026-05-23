@@ -1,18 +1,20 @@
 # SearXNG Requirements
 
-## Endpoint Policy
+Claude Code needs structured search results. Use a trusted SearXNG endpoint with JSON output enabled.
 
-Use self-hosted or trusted managed SearXNG for durable coding-agent workflows.
+## Endpoint
 
-Public instances are acceptable only for quick, non-sensitive experiments. Do not configure random public-instance fallback as a default.
+Use one of:
 
-If no trusted endpoint exists yet, use [Local SearXNG Setup](local-searxng.md) to start a local development instance.
+- a self-hosted SearXNG instance
+- a trusted managed SearXNG endpoint
+- the local test endpoint from [Local SearXNG setup](local-searxng.md)
+
+Do not use random public instances for durable workflows.
 
 ## JSON Output
 
-Claude Code MCP adapters need structured search results. SearXNG must allow JSON output for the Search API.
-
-Operator-side setting:
+SearXNG must allow JSON output:
 
 ```yaml
 search:
@@ -21,41 +23,22 @@ search:
     - json
 ```
 
-After changing settings, restart SearXNG and verify:
+Verify:
 
 ```sh
 make verify-json URL=https://search.example.org
 make verify-search URL=https://search.example.org
 ```
 
-If the endpoint returns `403 Forbidden`, JSON output is probably disabled.
-
-If JSON works but search returns no results, use a search engine profile that is available in your region. Do not document regional service workarounds.
-
-## Safe Defaults
-
-Recommended operator defaults:
-
-- keep logs minimal and public-safe
-- set reasonable rate limits
-- avoid exposing admin surfaces publicly
-- document enabled engines
-- document safe-search behavior
-- keep network routing and credential values out of shared configuration
+`403 Forbidden` usually means JSON output is disabled.
 
 ## Query Rules
 
-Agents should:
+Search only public information. Rewrite private tasks into narrow public-safe queries. Prefer official sources and cite opened public URLs.
 
-- search only after local context is insufficient
-- rewrite tasks into narrow public-safe queries
-- avoid private code and private issue text
-- avoid local paths, private hostnames, credentials, and customer data
-- prefer official sources and primary documentation
-- cite opened public URLs
+Do not include private code, issue text, local paths, private hosts, credentials, customer data, or private endpoint values.
 
 ## References
 
 - [SearXNG Search API documentation](https://docs.searxng.org/dev/search_api.html)
 - [SearXNG settings documentation](https://docs.searxng.org/admin/settings/settings.html)
-- [deployment hardening](deployment-hardening.md)
