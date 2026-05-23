@@ -8,6 +8,7 @@
     "check": "node --check scripts/doctor.mjs && node --check scripts/install-claude-code.mjs && node --check scripts/self-test.mjs && node --check scripts/setup-searxng-local.mjs && node --check scripts/status.mjs && node --check scripts/uninstall-claude-code.mjs && node --check scripts/verify-searxng-json.mjs",
     "doctor": "node scripts/doctor.mjs",
     "install:claude-code": "node scripts/install-claude-code.mjs",
+    "review": "npm test && npm run doctor",
     "self-test": "node scripts/self-test.mjs",
     "setup:searxng": "node scripts/setup-searxng-local.mjs",
     "status": "node scripts/status.mjs",

@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
+const root = join(here, "..");
 const installScript = join(here, "install-claude-code.mjs");
 const setupScript = join(here, "setup-searxng-local.mjs");
 const statusScript = join(here, "status.mjs");
@@ -18,6 +19,14 @@ function run(args) {
   });
 }
 
+function runCommand(command, args) {
+  return spawnSync(command, args, {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+}
+
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
@@ -26,11 +35,43 @@ function includes(result, text) {
   return `${result.stdout}${result.stderr}`.includes(text);
 }
 
+function parseJson(result) {
+  const text = `${result.stdout}${result.stderr}`.trim();
+  assert(text.length > 0, "expected JSON output");
+  return JSON.parse(text);
+}
+
 function testDryRun() {
   const result = run([installScript, "--url", "https://search.example.org"]);
   assert(result.status === 0, "dry-run should succeed");
   assert(includes(result, "install-claude-code: dry-run"), "dry-run label missing");
   assert(includes(result, "claude mcp add -s local -e SEARXNG_URL=https://search.example.org -t stdio searxng"), "claude command missing or malformed");
+}
+
+function testInstallJsonDryRun() {
+  const result = run([installScript, "--url", "https://search.example.org", "--json"]);
+  assert(result.status === 0, "install json dry-run should succeed");
+  const payload = parseJson(result);
+  assert(payload.ok === true, "install json dry-run should be ok");
+  assert(payload.mode === "dry-run", "install json dry-run mode missing");
+  assert(payload.command.includes("claude mcp add"), "install json command missing");
+}
+
+function testNpmSilentJsonDryRun() {
+  const result = runCommand("npm", [
+    "--silent",
+    "run",
+    "install:claude-code",
+    "--",
+    "--url",
+    "https://search.example.org",
+    "--json"
+  ]);
+  assert(result.status === 0, "npm silent json dry-run should succeed");
+  const text = result.stdout.trim();
+  assert(text.startsWith("{") && text.endsWith("}"), "npm silent json dry-run should emit one JSON object on stdout");
+  const payload = JSON.parse(text);
+  assert(payload.ok === true, "npm silent json dry-run should be ok");
 }
 
 function testProjectScopeGuard() {
@@ -58,6 +99,14 @@ function testInvalidUrl() {
   assert(includes(result, "must use http or https"), "invalid protocol message missing");
 }
 
+function testVerifyJsonError() {
+  const result = run([verifyScript, "--url", "file:///tmp/search", "--json"]);
+  assert(result.status !== 0, "verify json error should fail");
+  const payload = parseJson(result);
+  assert(payload.ok === false, "verify json error should be false");
+  assert(payload.error.includes("must use http or https"), "verify json error message missing");
+}
+
 function testVerifyHelp() {
   const result = run([verifyScript, "--help"]);
   assert(result.status === 0, "verify help should succeed");
@@ -68,6 +117,15 @@ function testSetupDryRun() {
   const result = run([setupScript]);
   assert(result.status === 0, "setup dry-run should succeed");
   assert(includes(result, "Dry-run only"), "setup dry-run label missing");
+}
+
+function testSetupJsonDryRun() {
+  const result = run([setupScript, "--json"]);
+  assert(result.status === 0, "setup json dry-run should succeed");
+  const payload = parseJson(result);
+  assert(payload.ok === true, "setup json dry-run should be ok");
+  assert(payload.mode === "dry-run", "setup json dry-run mode missing");
+  assert(payload.settingsPath === "local/searxng/settings.yml", "setup json settings path missing");
 }
 
 function testSetupProfileDryRun() {
@@ -94,17 +152,39 @@ function testStatusHelp() {
   assert(includes(result, "Usage:"), "status help usage missing");
 }
 
+function testStatusJsonError() {
+  const result = run([statusScript, "--url", "file:///tmp/search", "--json"]);
+  assert(result.status !== 0, "status json error should fail");
+  const payload = parseJson(result);
+  assert(payload.ok === false, "status json error should be false");
+  assert(Array.isArray(payload.checks), "status json checks missing");
+}
+
+function testUninstallJsonDryRun() {
+  const result = run([uninstallScript, "--json"]);
+  assert(result.status === 0, "uninstall json dry-run should succeed");
+  const payload = parseJson(result);
+  assert(payload.ok === true, "uninstall json dry-run should be ok");
+  assert(payload.command.includes("claude mcp remove"), "uninstall json command missing");
+}
+
 const tests = [
   testDryRun,
+  testInstallJsonDryRun,
+  testNpmSilentJsonDryRun,
   testProjectScopeGuard,
   testProjectScopeOverrideDryRun,
   testInvalidUrl,
+  testVerifyJsonError,
   testVerifyHelp,
   testSetupDryRun,
+  testSetupJsonDryRun,
   testSetupProfileDryRun,
   testUnknownSetupProfile,
   testStatusHelp,
-  testUninstallDryRun
+  testStatusJsonError,
+  testUninstallDryRun,
+  testUninstallJsonDryRun
 ];
 
 try {

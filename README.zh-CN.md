@@ -102,6 +102,26 @@ make uninstall-preview
 make uninstall-apply
 ```
 
+## Agent 辅助搭建
+
+AI agent 或脚本化流程请使用 [docs/agent-runbook.md](docs/agent-runbook.md)。它描述了当前已实现的 Claude Code 方向、dry-run 要求、JSON 输出命令、测试约束和隐私边界。
+
+机器可读命令示例：
+
+```sh
+npm --silent run setup:searxng -- --json
+npm --silent run verify:json -- --url "$SEARXNG_URL" --json
+npm --silent run verify:search -- --url "$SEARXNG_URL" --json
+npm --silent run install:claude-code -- --url "$SEARXNG_URL" --scope local --json
+npm --silent run status -- --url "$SEARXNG_URL" --json
+```
+
+提交较大变更前运行：
+
+```sh
+make review
+```
+
 ## 安全模型
 
 SearXNG 只用于公开信息搜索。不要把以下内容放进搜索 query：
@@ -127,18 +147,13 @@ SearXNG 只用于公开信息搜索。不要把以下内容放进搜索 query：
 
 Codex、OpenClaw、remote HTTP MCP servers 和团队托管方案，应该等到有同等验证后再加入。
 
-## 调研如何落地
+## 文档结构
 
-[docs/research-to-starter.md](docs/research-to-starter.md) 说明了如何把 `awesome-agent-search` 中的调研结论拆成安装型 starter：SearXNG JSON 验证、Claude Code MCP 接入、dry-run installer、安全指令、smoke test 和 negative test。
+先看 [docs/README.md](docs/README.md)。文档按用途分层：
 
-[docs/adapter-choice.md](docs/adapter-choice.md) 说明了为什么当前默认生成 `npx -y mcp-searxng` 形态，以及未来替换 adapter 的标准。
+- 搭建当前路径：[Claude Code setup](docs/claude-code.md)、[Local SearXNG setup](docs/local-searxng.md)、[SearXNG requirements](docs/searxng.md)、[Agent runbook](docs/agent-runbook.md)。
+- 验证和运维：[Go-live checklist](docs/go-live-checklist.md)、[Post-install lifecycle](docs/post-install.md)、[Troubleshooting](docs/troubleshooting.md)。
+- 安全和加固：[Security guidance](docs/security.md)、[Privacy reality](docs/privacy-reality.md)、[Deployment hardening](docs/deployment-hardening.md)。
+- 研究和决策：[Research to starter](docs/research-to-starter.md)、[Adapter choice](docs/adapter-choice.md)、[MCP adapter comparison](docs/mcp-adapter-comparison.md)、[SearXNG Claude Code research](docs/searxng-claude-code-research.md)。
 
-[docs/local-searxng.md](docs/local-searxng.md) 说明了如何在没有可信 endpoint 时，用本地 Docker Compose 先启动一个 SearXNG。
-
-[docs/post-install.md](docs/post-install.md) 说明安装后的生命周期、scope、生效范围、重启行为和卸载方式。
-
-[docs/go-live-checklist.md](docs/go-live-checklist.md) 是安装完成后的上线自测清单。
-
-[docs/troubleshooting.md](docs/troubleshooting.md) 记录了脱敏后的真实使用问题和处理方式。
-
-[docs/privacy-reality.md](docs/privacy-reality.md) 说明 local SearXNG 的真实隐私边界：它避免使用随机公共 SearXNG 实例，但上游搜索引擎仍会收到 query；本仓库提供的是指令约束和验证流程，不是自动清洗所有 query 的强制网关。
+`docs/zh-CN/` 下保留较长研究/背景文档的中文版本，英文文档仍是 canonical source。

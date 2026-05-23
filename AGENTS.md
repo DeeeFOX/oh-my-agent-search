@@ -44,12 +44,15 @@ make verify-search URL="$SEARXNG_URL"
 
 Use a real endpoint only in local commands. Do not commit it.
 
+When an agent or script needs to parse command output, use documented `--json` flags with `npm --silent run` or direct `node scripts/...` commands instead of scraping human-readable status text.
+
 ## Safety Rules
 
 - Default installers to dry-run.
 - Require `--apply` for commands that modify Claude Code MCP configuration.
 - Prefer `local` or `user` MCP scope.
 - Require explicit confirmation before using `project` scope.
+- Require explicit confirmation before overwriting generated local files with `--force`.
 - Never auto-write `.mcp.json` with a real endpoint.
 - Keep URL reading separate from search.
 - Do not recommend random public SearXNG instances for durable workflows.

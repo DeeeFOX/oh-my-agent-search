@@ -4,7 +4,7 @@
 
 Start a local SearXNG instance for Claude Code search testing when no trusted endpoint is available yet.
 
-This path is for local development. For shared or production use, review deployment hardening in `awesome-agent-search`.
+This path is for local development. For shared or production use, review [deployment hardening](deployment-hardening.md).
 
 ## Safety Defaults
 
@@ -22,6 +22,12 @@ Preview the local files that would be created:
 
 ```sh
 make setup-searxng
+```
+
+For agent-assisted setup, use machine-readable output:
+
+```sh
+npm --silent run setup:searxng -- --json
 ```
 
 Preview a region-appropriate engine profile when the default profile does not return results in your region:

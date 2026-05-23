@@ -8,6 +8,12 @@ Run this checklist after installing the Claude Code MCP server.
 make status URL="$SEARXNG_URL"
 ```
 
+For agent-assisted checks:
+
+```sh
+npm --silent run status -- --url "$SEARXNG_URL" --json
+```
+
 Expected:
 
 - Node.js is available

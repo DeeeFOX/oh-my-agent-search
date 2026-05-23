@@ -53,4 +53,5 @@ uninstall-preview:
 uninstall-apply:
 	npm run uninstall:claude-code -- --apply
 
-review: check doctor
+review:
+	npm run review

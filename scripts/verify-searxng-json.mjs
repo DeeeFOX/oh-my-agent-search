@@ -5,6 +5,7 @@ const DEFAULT_TIMEOUT_MS = 30000;
 const DEFAULT_MIN_RESULTS = 1;
 const DEFAULT_RETRIES = 0;
 const DEFAULT_RETRY_DELAY_MS = 3000;
+const TOOL_NAME = "verify-searxng-json";
 
 function parseArgs(argv) {
   const args = {};
@@ -16,6 +17,7 @@ function parseArgs(argv) {
     else if (value === "--retries") args.retries = Number(argv[++index]);
     else if (value === "--retry-delay-ms") args.retryDelayMs = Number(argv[++index]);
     else if (value === "--timeout-ms") args.timeoutMs = Number(argv[++index]);
+    else if (value === "--json") args.json = true;
     else if (value === "--help" || value === "-h") args.help = true;
     else throw new Error(`Unknown argument: ${value}`);
   }
@@ -24,12 +26,13 @@ function parseArgs(argv) {
 
 function usage() {
   return [
-    "Usage: node scripts/verify-searxng-json.mjs --url <searxng-url> [--query <query>] [--min-results <n>] [--timeout-ms <ms>] [--retries <n>]",
+    "Usage: node scripts/verify-searxng-json.mjs --url <searxng-url> [--query <query>] [--min-results <n>] [--timeout-ms <ms>] [--retries <n>] [--json]",
     "",
     "Examples:",
     "  npm run verify:searxng -- --url https://search.example.org",
     "  npm run verify:searxng -- --url https://search.example.org --min-results 0",
-    "  npm run verify:searxng -- --url https://search.example.org --min-results 1 --retries 2"
+    "  npm run verify:searxng -- --url https://search.example.org --min-results 1 --retries 2",
+    "  npm --silent run verify:searxng -- --url https://search.example.org --json"
   ].join("\n");
 }
 
@@ -98,8 +101,7 @@ async function fetchSearchPayload(searchUrl, timeoutMs) {
   }
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
+async function main(args) {
   if (args.help) {
     console.log(usage());
     return;
@@ -121,7 +123,9 @@ async function main() {
 
   let payload;
   let lastError;
+  let attempts = 0;
   for (let attempt = 0; attempt <= retries; attempt += 1) {
+    attempts = attempt + 1;
     try {
       payload = await fetchSearchPayload(searchUrl, timeoutMs);
       if (Array.isArray(payload.results) && payload.results.length >= minResults) break;
@@ -142,10 +146,41 @@ async function main() {
     throw new Error(`${lastError.message} Use a search engine profile that works in your region, increase timeout, or retry later.`);
   }
 
+  if (args.json) {
+    console.log(JSON.stringify({
+      ok: true,
+      tool: TOOL_NAME,
+      endpoint: endpoint.href,
+      origin: endpoint.origin,
+      query,
+      minResults,
+      results: payload.results.length,
+      attempts
+    }));
+    return;
+  }
+
   console.log(`verify-searxng-json: ok (${payload.results.length} results, ${endpoint.origin})`);
 }
 
-main().catch((error) => {
-  console.error(`verify-searxng-json: failed: ${error.message}`);
+let parsedArgs = { json: process.argv.slice(2).includes("--json") };
+
+try {
+  parsedArgs = parseArgs(process.argv.slice(2));
+  if (parsedArgs.help) {
+    console.log(usage());
+  } else {
+    await main(parsedArgs);
+  }
+} catch (error) {
+  if (parsedArgs?.json) {
+    console.log(JSON.stringify({
+      ok: false,
+      tool: TOOL_NAME,
+      error: error.message
+    }));
+  } else {
+    console.error(`verify-searxng-json: failed: ${error.message}`);
+  }
   process.exitCode = 1;
-});
+}

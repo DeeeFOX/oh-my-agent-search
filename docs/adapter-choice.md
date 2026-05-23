@@ -10,6 +10,8 @@ claude mcp add -s local -e SEARXNG_URL=https://search.example.org -t stdio searx
 
 This makes `mcp-searxng` the first adapter path to verify, not a permanent endorsement.
 
+For the dated comparison behind this choice, see [MCP SearXNG server comparison](mcp-adapter-comparison.md).
+
 ## Why This Shape
 
 The first release optimizes for a small, reviewable Claude Code setup:
@@ -48,6 +50,6 @@ Do not add adapters only because they exist. Every adapter should have a verifie
 
 ## Relationship To `awesome-agent-search`
 
-`awesome-agent-search` owns the comparison and research layer.
+`awesome-agent-search` owns broad cross-agent comparison and research.
 
-This repository owns the installable path. When adapter evidence changes, update the comparison in `awesome-agent-search` first, then update this starter.
+This repository owns the installable path and keeps a local adapter comparison only when it affects the starter default. When adapter evidence changes, update the comparison note, then update this page only after the install command and acceptance checks still pass.

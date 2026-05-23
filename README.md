@@ -102,6 +102,26 @@ make uninstall-preview
 make uninstall-apply
 ```
 
+## Agent-Assisted Setup
+
+For AI agents or scripted workflows, use the [agent runbook](docs/agent-runbook.md). It defines the current Claude Code direction, dry-run requirements, JSON output commands, testing constraints, and privacy limits.
+
+Machine-readable command examples:
+
+```sh
+npm --silent run setup:searxng -- --json
+npm --silent run verify:json -- --url "$SEARXNG_URL" --json
+npm --silent run verify:search -- --url "$SEARXNG_URL" --json
+npm --silent run install:claude-code -- --url "$SEARXNG_URL" --scope local --json
+npm --silent run status -- --url "$SEARXNG_URL" --json
+```
+
+Before submitting substantial changes:
+
+```sh
+make review
+```
+
 ## Safety Model
 
 Use SearXNG only for public information. Do not search with:
@@ -148,26 +168,14 @@ make install-apply-check URL="$SEARXNG_URL"
 
 ## Repository Layout
 
-- [docs/adapter-choice.md](docs/adapter-choice.md) - current adapter default and replacement criteria.
-- [docs/claude-code.md](docs/claude-code.md) - Claude Code setup and verification.
-- [docs/go-live-checklist.md](docs/go-live-checklist.md) - post-install acceptance checks.
-- [docs/local-searxng.md](docs/local-searxng.md) - local Docker Compose SearXNG setup.
-- [docs/post-install.md](docs/post-install.md) - lifecycle, scope, restart, and removal behavior.
-- [docs/privacy-reality.md](docs/privacy-reality.md) - real privacy boundaries of local SearXNG and MCP search.
-- [docs/research-to-starter.md](docs/research-to-starter.md) - how research findings become installable starter artifacts.
-- [docs/searxng.md](docs/searxng.md) - SearXNG endpoint requirements.
-- [docs/security.md](docs/security.md) - privacy and MCP safety guidance.
-- [docs/troubleshooting.md](docs/troubleshooting.md) - sanitized field lessons and common setup fixes.
-- [templates/claude-code-instruction.md](templates/claude-code-instruction.md) - local instruction template.
-- [templates/go-live-prompts.md](templates/go-live-prompts.md) - prompts for Claude Code self-testing after installation.
-- [templates/mcp-server.json](templates/mcp-server.json) - project-scope MCP template using environment expansion.
-- [scripts/doctor.mjs](scripts/doctor.mjs) - local readiness checks.
-- [scripts/setup-searxng-local.mjs](scripts/setup-searxng-local.mjs) - dry-run-first local SearXNG setup.
-- [scripts/self-test.mjs](scripts/self-test.mjs) - offline tests for installer guards and dry-run output.
-- [scripts/status.mjs](scripts/status.mjs) - post-install status summary.
-- [scripts/uninstall-claude-code.mjs](scripts/uninstall-claude-code.mjs) - dry-run-first Claude Code MCP removal.
-- [scripts/verify-searxng-json.mjs](scripts/verify-searxng-json.mjs) - direct SearXNG JSON smoke test.
-- [scripts/install-claude-code.mjs](scripts/install-claude-code.mjs) - dry-run-first Claude Code MCP installer.
+Start with the [documentation map](docs/README.md). The docs are organized by purpose:
+
+- Build the current path: [Claude Code setup](docs/claude-code.md), [Local SearXNG setup](docs/local-searxng.md), [SearXNG requirements](docs/searxng.md), and [Agent runbook](docs/agent-runbook.md).
+- Verify and operate: [Go-live checklist](docs/go-live-checklist.md), [Post-install lifecycle](docs/post-install.md), and [Troubleshooting](docs/troubleshooting.md).
+- Safety and hardening: [Security guidance](docs/security.md), [Privacy reality](docs/privacy-reality.md), and [Deployment hardening](docs/deployment-hardening.md).
+- Research and decisions: [Research to starter](docs/research-to-starter.md), [Adapter choice](docs/adapter-choice.md), [MCP adapter comparison](docs/mcp-adapter-comparison.md), and [SearXNG Claude Code research](docs/searxng-claude-code-research.md).
+- Templates: [Claude Code instruction](templates/claude-code-instruction.md), [Go-live prompts](templates/go-live-prompts.md), and [project-scope MCP template](templates/mcp-server.json).
+- Scripts: [doctor](scripts/doctor.mjs), [setup-searxng-local](scripts/setup-searxng-local.mjs), [install-claude-code](scripts/install-claude-code.mjs), [status](scripts/status.mjs), [verify-searxng-json](scripts/verify-searxng-json.mjs), [uninstall-claude-code](scripts/uninstall-claude-code.mjs), and [self-test](scripts/self-test.mjs).
 
 ## Current Scope
 

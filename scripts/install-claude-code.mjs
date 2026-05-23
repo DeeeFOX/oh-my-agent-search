@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const DEFAULT_PACKAGE = "mcp-searxng";
 const DEFAULT_SERVER_NAME = "searxng";
 const VALID_SCOPES = new Set(["local", "user", "project"]);
+const TOOL_NAME = "install-claude-code";
 const here = dirname(fileURLToPath(import.meta.url));
 
 function parseArgs(argv) {
@@ -29,6 +30,7 @@ function parseArgs(argv) {
     else if (value === "--retries") args.retries = argv[++index];
     else if (value === "--retry-delay-ms") args.retryDelayMs = argv[++index];
     else if (value === "--timeout-ms") args.timeoutMs = argv[++index];
+    else if (value === "--json") args.json = true;
     else if (value === "--help" || value === "-h") args.help = true;
     else throw new Error(`Unknown argument: ${value}`);
   }
@@ -38,14 +40,15 @@ function parseArgs(argv) {
 
 function usage() {
   return [
-    "Usage: node scripts/install-claude-code.mjs --url <searxng-url> [--scope local|user|project] [--check-first] [--apply]",
+    "Usage: node scripts/install-claude-code.mjs --url <searxng-url> [--scope local|user|project] [--check-first] [--apply] [--json]",
     "",
     "Dry-run is the default. Add --apply to run claude mcp add.",
     "",
     "Examples:",
     "  npm run install:claude-code -- --url https://search.example.org",
     "  npm run install:claude-code -- --url https://search.example.org --check-first",
-    "  npm run install:claude-code -- --url https://search.example.org --apply"
+    "  npm run install:claude-code -- --url https://search.example.org --apply",
+    "  npm --silent run install:claude-code -- --url https://search.example.org --json"
   ].join("\n");
 }
 
@@ -81,8 +84,22 @@ function buildClaudeArgs(args) {
   ];
 }
 
+function shellQuote(arg) {
+  if (/^[A-Za-z0-9_@%+=:,./-]+$/.test(arg)) return arg;
+  return `'${arg.replace(/'/g, `'\"'\"'`)}'`;
+}
+
 function formatCommand(command, args) {
-  return [command, ...args.map((arg) => (arg.includes(" ") ? JSON.stringify(arg) : arg))].join(" ");
+  return [command, ...args.map((arg) => shellQuote(arg))].join(" ");
+}
+
+function parseJson(text) {
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 }
 
 function runPrecheck(args) {
@@ -91,53 +108,134 @@ function runPrecheck(args) {
   if (args.timeoutMs) verifyArgs.push("--timeout-ms", args.timeoutMs);
   if (args.retries) verifyArgs.push("--retries", args.retries);
   if (args.retryDelayMs) verifyArgs.push("--retry-delay-ms", args.retryDelayMs);
+  if (args.json) verifyArgs.push("--json");
 
-  const result = spawnSync(process.execPath, verifyArgs, { stdio: "inherit" });
+  const result = spawnSync(process.execPath, verifyArgs, {
+    encoding: "utf8",
+    stdio: args.json ? ["ignore", "pipe", "pipe"] : "inherit"
+  });
   if (result.error) throw result.error;
   if (result.status !== 0) {
+    if (args.json) {
+      const payload = parseJson(`${result.stdout ?? ""}${result.stderr ?? ""}`.trim());
+      throw new Error(payload?.error || payload?.message || "SearXNG JSON precheck failed. Fix the endpoint before installing.");
+    }
     throw new Error("SearXNG JSON precheck failed. Fix the endpoint before installing.");
   }
+
+  return args.json ? parseJson(result.stdout?.trim()) : null;
 }
 
-function main() {
-  const args = parseArgs(process.argv.slice(2));
+function printHumanDryRun(command) {
+  console.log("install-claude-code: dry-run");
+  console.log(command);
+  console.log("");
+  console.log("Re-run with --apply after reviewing the command.");
+}
+
+function printHumanSuccess(serverName) {
+  console.log("");
+  console.log("install-claude-code: done");
+  console.log("Next checks:");
+  console.log("  claude mcp list");
+  console.log(`  claude mcp get ${serverName}`);
+  console.log("  /mcp");
+}
+
+function emitJson(payload) {
+  console.log(JSON.stringify(payload));
+}
+
+async function main(args) {
   if (args.help) {
     console.log(usage());
     return;
   }
 
   validateArgs(args);
-  if (args.checkFirst) runPrecheck(args);
+  const precheck = args.checkFirst ? runPrecheck(args) : null;
 
   const claudeArgs = buildClaudeArgs(args);
   const command = formatCommand("claude", claudeArgs);
 
   if (!args.apply) {
-    console.log("install-claude-code: dry-run");
-    console.log(command);
-    console.log("");
-    console.log("Re-run with --apply after reviewing the command.");
+    if (args.json) {
+      emitJson({
+        ok: true,
+        tool: TOOL_NAME,
+        mode: "dry-run",
+        serverName: args.serverName,
+        scope: args.scope,
+        packageName: args.packageName,
+        url: args.url,
+        checkFirst: Boolean(args.checkFirst),
+        precheck,
+        command
+      });
+      return;
+    }
+
+    printHumanDryRun(command);
     return;
   }
 
-  const result = spawnSync("claude", claudeArgs, { stdio: "inherit" });
+  const result = spawnSync("claude", claudeArgs, {
+    encoding: "utf8",
+    stdio: args.json ? ["ignore", "pipe", "pipe"] : "inherit"
+  });
   if (result.error) throw result.error;
   if (result.status !== 0) {
+    if (args.json) {
+      const output = `${result.stdout ?? ""}${result.stderr ?? ""}`.trim();
+      throw new Error(output || "claude mcp add failed.");
+    }
     process.exitCode = result.status ?? 1;
     return;
   }
 
-  console.log("");
-  console.log("install-claude-code: done");
-  console.log("Next checks:");
-  console.log(`  claude mcp list`);
-  console.log(`  claude mcp get ${args.serverName}`);
-  console.log("  /mcp");
+  if (args.json) {
+    emitJson({
+      ok: true,
+      tool: TOOL_NAME,
+      mode: "apply",
+      serverName: args.serverName,
+      scope: args.scope,
+      packageName: args.packageName,
+      url: args.url,
+      checkFirst: Boolean(args.checkFirst),
+      precheck,
+      command,
+      nextChecks: [
+        "claude mcp list",
+        `claude mcp get ${args.serverName}`,
+        "/mcp"
+      ]
+    });
+    return;
+  }
+
+  printHumanSuccess(args.serverName);
 }
 
+let parsedArgs = { json: process.argv.slice(2).includes("--json") };
+
 try {
-  main();
+  parsedArgs = parseArgs(process.argv.slice(2));
+  if (parsedArgs.help) {
+    console.log(usage());
+  } else {
+    await main(parsedArgs);
+  }
 } catch (error) {
-  console.error(`install-claude-code: failed: ${error.message}`);
+  if (parsedArgs?.json) {
+    emitJson({
+      ok: false,
+      tool: TOOL_NAME,
+      mode: parsedArgs.apply ? "apply" : "dry-run",
+      error: error.message
+    });
+  } else {
+    console.error(`install-claude-code: failed: ${error.message}`);
+  }
   process.exitCode = 1;
 }

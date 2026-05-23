@@ -4,6 +4,36 @@
 
 Add a SearXNG-backed MCP search server to Claude Code and verify it before relying on it.
 
+This is the currently implemented direction in this starter. Other agents can read the repository and help with setup, but this page only describes the Claude Code integration path.
+
+## Quickstart
+
+Use a trusted SearXNG endpoint, or start a local development endpoint with [Local SearXNG Setup](local-searxng.md).
+
+```sh
+export SEARXNG_URL="https://search.example.org"
+make verify-json URL="$SEARXNG_URL"
+make verify-search URL="$SEARXNG_URL"
+make install-preview-check URL="$SEARXNG_URL"
+make install-apply-check URL="$SEARXNG_URL"
+make status URL="$SEARXNG_URL"
+```
+
+Then verify the MCP server in Claude Code:
+
+```sh
+claude mcp list
+claude mcp get searxng
+```
+
+Inside Claude Code:
+
+```text
+/mcp
+```
+
+Use [templates/go-live-prompts.md](../templates/go-live-prompts.md) for the post-install search, lifecycle, and privacy checks.
+
 ## Recommended Scope
 
 Use `local` scope for a single project:
@@ -19,6 +49,20 @@ npm run install:claude-code -- --url https://search.example.org --scope user
 ```
 
 Avoid `project` scope until the team has reviewed the exact `.mcp.json` and endpoint policy.
+
+## Machine-Readable Output
+
+Use `--json` when another agent or script needs to parse command results:
+
+```sh
+npm --silent run verify:json -- --url "$SEARXNG_URL" --json
+npm --silent run verify:search -- --url "$SEARXNG_URL" --json
+npm --silent run install:claude-code -- --url "$SEARXNG_URL" --scope local --json
+npm --silent run install:claude-code -- --url "$SEARXNG_URL" --scope local --check-first --json
+npm --silent run status -- --url "$SEARXNG_URL" --json
+```
+
+Use the human-readable output for manual review. Use JSON output for automation and do not parse PASS/WARN/FAIL prose. Use `npm --silent run` or direct `node scripts/...` commands when stdout must be pure JSON.
 
 ## Install Flow
 
@@ -98,4 +142,4 @@ make uninstall-apply
 ## References
 
 - [Claude Code MCP documentation](https://code.claude.com/docs/en/mcp)
-- [awesome-agent-search Claude Code self-bootstrap guide](https://github.com/DeeeFOX/awesome-agent-search/blob/main/docs/integrations/claude-code-self-bootstrap.md)
+- [awesome-agent-search Claude Code MCP guide](https://github.com/DeeeFOX/awesome-agent-search/blob/main/docs/integrations/claude-code-mcp.md)

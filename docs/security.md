@@ -9,6 +9,8 @@ Adding web search to a coding agent creates two main risks:
 
 This repository defaults to explicit verification and narrow instructions instead of hidden search behavior.
 
+For endpoint and operator-side controls, use [deployment hardening](deployment-hardening.md). This page focuses on user, agent, and MCP safety rules.
+
 ## Do Not Search With Private Context
 
 Never include:
@@ -49,6 +51,8 @@ Treat URL reading as a separate permission boundary:
 - avoid private-network targets
 - cap retrieved content
 - cite opened URLs
+
+If an adapter exposes URL reading, verify the tool list during go-live and keep search and URL-reading expectations separate.
 
 ## Installer Safety
 

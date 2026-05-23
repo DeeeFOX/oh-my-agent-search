@@ -10,10 +10,10 @@ The raw research report is not copied here. It may contain environment-specific 
 
 `awesome-agent-search` remains the source of truth for:
 
-- adapter comparisons
+- broad adapter comparisons
 - search-backend tradeoffs
 - privacy principles
-- hardening checklists
+- broad hardening checklists
 - evaluation rubrics
 - dated research observations
 - cross-agent patterns for Codex, Claude Code, OpenClaw, and generic agents
@@ -31,6 +31,7 @@ Use it to decide what is safe and worth standardizing.
 - public-safe instruction templates
 - smoke tests and negative tests
 - troubleshooting for common setup failures
+- starter-specific adapter and hardening notes when they directly affect the current Claude Code path
 
 Use this repository to execute the chosen path.
 
@@ -46,16 +47,20 @@ Use this repository to execute the chosen path.
 | Project-scoped MCP config can leak shared assumptions. | [docs/security.md](security.md) and the installer's `--allow-project-scope` guard. |
 | Setup needs repeatable checks, not only prose. | [scripts/doctor.mjs](../scripts/doctor.mjs), `make doctor`, `make verify-json`, and `make verify-search`. |
 | Adapter choice must remain reviewable. | [docs/adapter-choice.md](adapter-choice.md) and `make install-preview`. |
+| Adapter comparisons need dated evidence. | [docs/mcp-adapter-comparison.md](mcp-adapter-comparison.md) as background for [docs/adapter-choice.md](adapter-choice.md). |
 | Installers should fail before mutation when endpoint setup is broken. | `--check-first`, `make install-preview-check`, and `make install-apply-check`. |
+| Agents need stable automation surfaces. | [docs/agent-runbook.md](agent-runbook.md) and `--json` output in setup, verify, install, status, and uninstall scripts. |
+| Durable endpoints need operator-side controls. | [docs/deployment-hardening.md](deployment-hardening.md), [docs/security.md](security.md), and [docs/privacy-reality.md](privacy-reality.md). |
 | Engine availability varies by region. | [docs/troubleshooting.md](troubleshooting.md) and engine profiles under [templates/searxng/profiles](../templates/searxng/profiles). |
 | Installation needs a lifecycle and go-live handoff. | [docs/post-install.md](post-install.md), [docs/go-live-checklist.md](go-live-checklist.md), [templates/go-live-prompts.md](../templates/go-live-prompts.md), and `make status`. |
+| Sanitized research should remain separate from install flow. | [docs/searxng-claude-code-research.md](searxng-claude-code-research.md). |
 
 ## Installation Content Extraction Rules
 
 When extracting installation material from a research report:
 
 1. Replace real endpoints with `https://search.example.org`.
-2. Remove local absolute paths, proxy values, account identifiers, and credentials.
+2. Remove local absolute paths, network routing values, account identifiers, and credentials.
 3. Convert screenshots or one-off notes into commands that can be reviewed.
 4. Separate observations from defaults.
 5. Prefer dry-run commands before any command that mutates Claude Code configuration.
@@ -114,5 +119,6 @@ A research-to-starter change is ready when:
 - `make review` passes
 - endpoint examples are placeholders
 - installer behavior is dry-run by default
+- agent-facing JSON output remains parseable where documented
 - smoke and negative tests are documented
 - no private endpoints, local absolute paths, credentials, cookies, tokens, or session material are present

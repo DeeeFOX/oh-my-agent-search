@@ -41,7 +41,7 @@ Recommended operator defaults:
 - avoid exposing admin surfaces publicly
 - document enabled engines
 - document safe-search behavior
-- keep proxy and credential values out of shared configuration
+- keep network routing and credential values out of shared configuration
 
 ## Query Rules
 
@@ -58,4 +58,4 @@ Agents should:
 
 - [SearXNG Search API documentation](https://docs.searxng.org/dev/search_api.html)
 - [SearXNG settings documentation](https://docs.searxng.org/admin/settings/settings.html)
-- [awesome-agent-search hardening guide](https://github.com/DeeeFOX/awesome-agent-search/blob/main/docs/hardening/searxng-deployment.md)
+- [deployment hardening](deployment-hardening.md)

@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
+const TOOL_NAME = "setup-searxng-local";
 const templateRoot = join(root, "templates", "searxng");
 const profiles = new Map([
   ["default", join(templateRoot, "settings.yml")],
@@ -26,6 +27,7 @@ function parseArgs(argv) {
     else if (value === "--start") args.start = true;
     else if (value === "--port") args.port = argv[++index];
     else if (value === "--profile") args.profile = argv[++index];
+    else if (value === "--json") args.json = true;
     else if (value === "--help" || value === "-h") args.help = true;
     else throw new Error(`Unknown argument: ${value}`);
   }
@@ -34,7 +36,7 @@ function parseArgs(argv) {
 
 function usage() {
   return [
-    "Usage: node scripts/setup-searxng-local.mjs [--profile default|bing-only] [--port 8080] [--apply] [--start] [--force]",
+    "Usage: node scripts/setup-searxng-local.mjs [--profile default|bing-only] [--port 8080] [--apply] [--start] [--force] [--json]",
     "",
     "Dry-run is the default. Add --apply to write ignored local files.",
     "Add --start with --apply to run docker compose up -d.",
@@ -43,7 +45,8 @@ function usage() {
     "  npm run setup:searxng",
     "  npm run setup:searxng -- --profile bing-only",
     "  npm run setup:searxng -- --apply",
-    "  npm run setup:searxng -- --profile bing-only --apply --start"
+    "  npm run setup:searxng -- --profile bing-only --apply --start",
+    "  npm --silent run setup:searxng -- --json"
   ].join("\n");
 }
 
@@ -69,19 +72,27 @@ function renderEnv(port) {
   ].join("\n");
 }
 
-function runDockerCompose() {
+function runDockerCompose(json) {
   const result = spawnSync("docker", ["compose", "up", "-d"], {
     cwd: root,
-    stdio: "inherit"
+    encoding: "utf8",
+    stdio: json ? ["ignore", "pipe", "pipe"] : "inherit"
   });
   if (result.error) throw result.error;
   if (result.status !== 0) {
+    if (json) {
+      const output = `${result.stdout ?? ""}${result.stderr ?? ""}`.trim();
+      throw new Error(output || "docker compose up -d failed.");
+    }
     process.exitCode = result.status ?? 1;
   }
 }
 
-function main() {
-  const args = parseArgs(process.argv.slice(2));
+function emitJson(payload) {
+  console.log(JSON.stringify(payload));
+}
+
+function main(args) {
   if (args.help) {
     console.log(usage());
     return;
@@ -92,15 +103,40 @@ function main() {
     throw new Error(`Unknown profile: ${args.profile}. Available profiles: ${Array.from(profiles.keys()).join(", ")}`);
   }
 
-  console.log("setup-searxng-local:");
-  console.log(`  profile:  ${args.profile}`);
-  console.log(`  settings: ${settingsPath}`);
-  console.log(`  env:      ${envPath}`);
-  console.log(`  url:      http://127.0.0.1:${args.port}`);
+  const url = `http://127.0.0.1:${args.port}`;
+  const summary = {
+    ok: true,
+    tool: TOOL_NAME,
+    profile: args.profile,
+    port: Number(args.port),
+    url,
+    settingsPath: "local/searxng/settings.yml",
+    envPath: ".env"
+  };
+
+  if (args.json) {
+    if (!args.apply) {
+      emitJson({
+        ...summary,
+        mode: "dry-run",
+        start: Boolean(args.start),
+        force: Boolean(args.force)
+      });
+      return;
+    }
+  } else {
+    console.log("setup-searxng-local:");
+    console.log(`  profile:  ${args.profile}`);
+    console.log(`  settings: ${settingsPath}`);
+    console.log(`  env:      ${envPath}`);
+    console.log(`  url:      ${url}`);
+  }
 
   if (!args.apply) {
-    console.log("");
-    console.log("Dry-run only. Re-run with --apply to write ignored local files.");
+    if (!args.json) {
+      console.log("");
+      console.log("Dry-run only. Re-run with --apply to write ignored local files.");
+    }
     return;
   }
 
@@ -111,18 +147,54 @@ function main() {
   mkdirSync(localDir, { recursive: true });
   writeFileSync(settingsPath, renderSettings(args.profile));
   writeFileSync(envPath, renderEnv(args.port));
+  if (args.json) {
+    const payload = {
+      ...summary,
+      mode: "apply",
+      start: Boolean(args.start),
+      force: Boolean(args.force),
+      createdFiles: ["local/searxng/settings.yml", ".env"],
+      started: Boolean(args.start)
+    };
+
+    if (args.start) {
+      runDockerCompose(true);
+    }
+
+    emitJson(payload);
+    return;
+  }
+
   console.log("Wrote ignored local SearXNG files.");
 
   if (args.start) {
-    runDockerCompose();
+    runDockerCompose(false);
   } else {
     console.log("Next: docker compose up -d");
   }
 }
 
+let parsedArgs = { json: process.argv.slice(2).includes("--json") };
+
 try {
-  main();
+  parsedArgs = parseArgs(process.argv.slice(2));
+  if (parsedArgs.help) {
+    console.log(usage());
+  } else {
+    main(parsedArgs);
+  }
 } catch (error) {
-  console.error(`setup-searxng-local: failed: ${error.message}`);
+  if (parsedArgs?.json) {
+    emitJson({
+      ok: false,
+      tool: TOOL_NAME,
+      profile: parsedArgs.profile ?? "default",
+      port: parsedArgs.port ? Number(parsedArgs.port) : null,
+      mode: parsedArgs.apply ? "apply" : "dry-run",
+      error: error.message
+    });
+  } else {
+    console.error(`setup-searxng-local: failed: ${error.message}`);
+  }
   process.exitCode = 1;
 }
