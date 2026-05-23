@@ -7,13 +7,13 @@ Use this checklist to make `oh-my-agent-search` easier to find, share, and evalu
 Primary description:
 
 ```text
-Self-hosted-friendly SearXNG search starter for Claude Code via MCP, with dry-run install and local verification.
+A self-contained, self-hosted-friendly SearXNG search starter for Claude Code through MCP.
 ```
 
 Longer share copy:
 
 ```text
-Oh My Agent Search is a Claude Code MCP SearXNG search starter. It helps developers bring their own trusted or self-hosted SearXNG endpoint, preview MCP config changes, install with an explicit --apply step, and keep search queries public-safe.
+Oh My Agent Search is a self-contained, self-hosted-friendly SearXNG search starter for Claude Code through MCP. It helps developers bring their own trusted or self-hosted SearXNG endpoint, preview MCP config changes, install with an explicit --apply step, and keep search queries public-safe.
 ```
 
 Primary keywords:
@@ -36,7 +36,7 @@ Set these manually in the GitHub repository settings.
 About description:
 
 ```text
-Self-hosted-friendly SearXNG search starter for Claude Code via MCP, with dry-run install and local verification.
+A self-contained, self-hosted-friendly SearXNG search starter for Claude Code through MCP.
 ```
 
 Website:
@@ -76,7 +76,7 @@ Use this for the first GitHub release.
 ```md
 ## v0.1.0
 
-Initial installable starter for adding self-hosted-friendly SearXNG search to Claude Code through MCP.
+Initial self-contained, self-hosted-friendly SearXNG search starter for Claude Code through MCP.
 
 Highlights:
 

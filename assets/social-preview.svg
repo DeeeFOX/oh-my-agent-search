@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
   <title id="title">Oh My Agent Search social preview</title>
-  <desc id="desc">Cyberpunk social preview for a self-hosted-friendly Claude Code MCP SearXNG search starter.</desc>
+  <desc id="desc">Cyberpunk social preview for a self-contained, self-hosted-friendly SearXNG search starter for Claude Code through MCP.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#080916"/>

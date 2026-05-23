@@ -4,7 +4,7 @@
 
 [![Check](https://github.com/DeeeFOX/oh-my-agent-search/actions/workflows/check.yml/badge.svg)](https://github.com/DeeeFOX/oh-my-agent-search/actions/workflows/check.yml)
 
-面向 Claude Code 的 MCP SearXNG search starter：把你自己的可信或 self-hosted SearXNG endpoint 接入 coding agent，并提供本地验证、dry-run installer 和公开安全搜索指引。
+一个 self-contained、self-hosted-friendly 的 SearXNG search starter，通过 MCP 为 Claude Code 接入搜索。
 
 当你希望 Claude Code 通过可信 SearXNG endpoint 搜索，同时避免提交私有 endpoint、误改 MCP 配置，或依赖随机公开搜索实例时，可以使用这个仓库。
 

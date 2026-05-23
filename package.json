@@ -2,7 +2,7 @@
   "name": "oh-my-agent-search",
   "version": "0.1.0",
   "private": true,
-  "description": "Installable starter for adding self-hosted-friendly SearXNG search to Claude Code through MCP.",
+  "description": "A self-contained, self-hosted-friendly SearXNG search starter for Claude Code through MCP.",
   "keywords": [
     "claude-code",
     "mcp",

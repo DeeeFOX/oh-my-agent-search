@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for improving `oh-my-agent-search`. Keep changes focused on helping users add self-hosted-friendly SearXNG search to Claude Code through MCP.
+Thanks for improving `oh-my-agent-search`. Keep changes focused on helping users add self-contained, self-hosted-friendly SearXNG search to Claude Code through MCP.
 
 ## Boundaries
 
