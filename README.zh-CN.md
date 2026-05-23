@@ -2,17 +2,40 @@
 
 [English](README.md) | 中文
 
-通过 MCP 为 Claude Code 接入 SearXNG 搜索，并在使用前完成本地验证。
+[![Check](https://github.com/DeeeFOX/oh-my-agent-search/actions/workflows/check.yml/badge.svg)](https://github.com/DeeeFOX/oh-my-agent-search/actions/workflows/check.yml)
+
+面向 Claude Code 的 MCP SearXNG search starter：把你自己的可信或 self-hosted SearXNG endpoint 接入 coding agent，并提供本地验证、dry-run installer 和公开安全搜索指引。
+
+当你希望 Claude Code 通过可信 SearXNG endpoint 搜索，同时避免提交私有 endpoint、误改 MCP 配置，或依赖随机公开搜索实例时，可以使用这个仓库。
+
+## 为什么需要它
+
+coding agent 接入搜索后更有用，但搜索 query 也可能泄露私有上下文。这个 starter 为 Claude Code 提供一条可重复的 SearXNG MCP 接入路径，并把风险点显式化：
+
+- 安装前验证 SearXNG JSON/search 是否可用
+- 应用 MCP 配置前先预览变更
+- 默认使用 `local` 或 `user` scope，避免不必要的共享项目配置
+- endpoint 保留在本地 MCP 配置中，不提交到仓库
+- 使用 go-live prompts 检查搜索、生命周期和隐私行为
+
+## 适合谁
+
+- 想为 Claude Code 接入 SearXNG MCP search 的用户
+- 想先测试本地 SearXNG 再交给 agent 使用的开发者
+- 想接入自己维护的 self-hosted 或可信 SearXNG endpoint 的开发者
+- 需要小而可审计的搜索 starter，而不是通用 agent catalog 的团队
+- 需要 JSON 输出做自动化和状态检查的 agent workflow
 
 ## 提供什么
 
-- 验证 SearXNG JSON/search 是否可用
-- 启动本地 SearXNG 供测试
-- 生成 Claude Code MCP 安装/卸载命令
-- 提供 go-live 自测 prompts
-- 提供公开安全搜索的最小安全边界
+- Claude Code MCP 安装/卸载辅助脚本
+- SearXNG JSON/search 可用性验证
+- 本地 SearXNG 测试环境启动
+- 面向不同地区搜索可用性的 engine probe
+- 用于 smoke、lifecycle、privacy 检查的 go-live prompts
+- 公开安全搜索的最小安全边界
 
-## 快速开始
+## 5 分钟快速开始
 
 `npm run` 和 `make` 命令默认在本仓库根目录运行。从其他目录执行时使用 `make -C <path-to-oh-my-agent-search> <target>`。
 
@@ -69,7 +92,17 @@ make verify-search URL="$SEARXNG_URL"
 
 `bing-only` 这类单引擎 profile 只作为排障 fallback。
 
-## Scope
+## 常见使用场景
+
+- 用 `local` MCP scope 为单个 Claude Code 项目增加 SearXNG search。
+- 用 `user` MCP scope 在多个项目复用同一个可信 SearXNG endpoint。
+- 先测试本地 SearXNG container，再接入 Claude Code。
+- 检查重启 Claude Code 或切换项目后搜索是否仍然可用。
+- 给其他 agent 提供 JSON 状态输出，避免解析人类可读日志。
+
+## 为什么更安全
+
+installer 默认 dry-run。MCP 配置变更需要显式 `--apply`，卸载 apply 需要显式 `--scope`。
 
 默认 scope 是 `local`：
 
@@ -82,6 +115,10 @@ make verify-search URL="$SEARXNG_URL"
 ```sh
 claude mcp get searxng
 ```
+
+SearXNG 只用于公开信息搜索。不要搜索 secrets、私有代码、私有 hostname、私有 endpoint、本地路径、客户数据，或会暴露意图的未发布名称。
+
+本地 SearXNG 避免使用随机公开实例，但上游搜索引擎仍会收到 query。
 
 ## 卸载
 
@@ -103,12 +140,6 @@ npm --silent run verify:search -- --url "$SEARXNG_URL" --json
 npm --silent run install:claude-code -- --url "$SEARXNG_URL" --scope local --check-first --json
 npm --silent run status -- --url "$SEARXNG_URL" --json
 ```
-
-## 安全
-
-SearXNG 只用于公开信息搜索。不要搜索 secrets、私有代码、私有 hostname、私有 endpoint、本地路径、客户数据，或会暴露意图的未发布名称。
-
-本地 SearXNG 避免使用随机公开实例，但上游搜索引擎仍会收到 query。
 
 ## 文档
 

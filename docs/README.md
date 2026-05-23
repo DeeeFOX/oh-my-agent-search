@@ -19,3 +19,5 @@ Use these docs in order.
 - [Security guidance](security.md) - query privacy and MCP scope.
 - [Agent runbook](agent-runbook.md) - JSON commands and automation flow.
 - [Adapter choice](adapter-choice.md) - current MCP adapter command.
+- [Exposure checklist](exposure.md) - GitHub metadata, social preview, and promotion copy.
+- [Contributing guide](../CONTRIBUTING.md) - contribution boundaries and required checks.

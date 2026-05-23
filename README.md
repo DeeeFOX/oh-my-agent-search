@@ -2,17 +2,40 @@
 
 English | [中文](README.zh-CN.md)
 
-Add SearXNG search to Claude Code through MCP, with dry-run installers and local verification before use.
+[![Check](https://github.com/DeeeFOX/oh-my-agent-search/actions/workflows/check.yml/badge.svg)](https://github.com/DeeeFOX/oh-my-agent-search/actions/workflows/check.yml)
+
+Claude Code MCP SearXNG search starter for bringing your own trusted or self-hosted search endpoint to coding agents, with local verification, dry-run installers, and public-safe query guidance.
+
+Use this repository when you want Claude Code to search through a trusted SearXNG endpoint without committing private endpoints, changing MCP config by accident, or relying on random public search instances.
+
+## Why This Exists
+
+Coding agents are more useful with search, but search queries can leak private context. This starter gives Claude Code a repeatable MCP path for SearXNG while keeping the risky parts explicit:
+
+- verify that SearXNG JSON/search works before installing
+- preview MCP config changes before applying them
+- prefer `local` or `user` scope over shared project config
+- keep endpoint values in local MCP config, not in this repository
+- use go-live prompts that check search, lifecycle, and privacy behavior
+
+## Who It Is For
+
+- Claude Code users who want MCP search backed by SearXNG
+- developers testing a local SearXNG instance before using it with an agent
+- developers bringing their own self-hosted or trusted SearXNG endpoint
+- teams that need a small, auditable search starter instead of a general agent catalog
+- agent workflows that need JSON output for automation and status checks
 
 ## What This Provides
 
+- Claude Code MCP install and uninstall helpers
 - SearXNG JSON/search verification
 - local SearXNG bootstrap for testing
-- Claude Code MCP install and uninstall helpers
+- engine probing for regional search availability
 - go-live prompts for smoke, lifecycle, and privacy checks
 - concise security guidance for public-safe search queries
 
-## Quick Start
+## 5-Minute Quick Start
 
 Run `npm run` and `make` commands from this repository root. From another directory, use `make -C <path-to-oh-my-agent-search> <target>`.
 
@@ -69,7 +92,17 @@ make verify-search URL="$SEARXNG_URL"
 
 Single-engine profiles such as `bing-only` are for troubleshooting.
 
-## Scope
+## Common Use Cases
+
+- Add SearXNG search to one Claude Code project with `local` MCP scope.
+- Reuse one trusted SearXNG endpoint across projects with `user` MCP scope.
+- Test a local SearXNG container before attaching it to Claude Code.
+- Check whether search still works after restarting Claude Code or switching projects.
+- Give another agent JSON status output instead of scraping human-readable logs.
+
+## What Makes It Safer
+
+The installer is dry-run by default. MCP config changes require `--apply`, and uninstall apply requires an explicit `--scope`.
 
 Default scope is `local`. Use:
 
@@ -82,6 +115,10 @@ If a `searxng` server already exists, check its scope before installing:
 ```sh
 claude mcp get searxng
 ```
+
+Use SearXNG only for public information. Do not search with secrets, private code, private hostnames, private endpoints, local paths, customer data, or unreleased names that reveal intent.
+
+Local SearXNG avoids random public instances, but selected upstream search engines still receive the query.
 
 ## Uninstall
 
@@ -103,12 +140,6 @@ npm --silent run verify:search -- --url "$SEARXNG_URL" --json
 npm --silent run install:claude-code -- --url "$SEARXNG_URL" --scope local --check-first --json
 npm --silent run status -- --url "$SEARXNG_URL" --json
 ```
-
-## Safety
-
-Use SearXNG only for public information. Do not search with secrets, private code, private hostnames, private endpoints, local paths, customer data, or unreleased names that reveal intent.
-
-Local SearXNG avoids random public instances, but selected upstream search engines still receive the query.
 
 ## Docs
 

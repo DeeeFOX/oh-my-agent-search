@@ -2,7 +2,28 @@
   "name": "oh-my-agent-search",
   "version": "0.1.0",
   "private": true,
-  "description": "Installable starter for adding privacy-aware SearXNG search to Claude Code through MCP.",
+  "description": "Installable starter for adding self-hosted-friendly SearXNG search to Claude Code through MCP.",
+  "keywords": [
+    "claude-code",
+    "mcp",
+    "model-context-protocol",
+    "searxng",
+    "self-hosted",
+    "search",
+    "privacy",
+    "ai-agents",
+    "agent-tools",
+    "developer-tools",
+    "local-first"
+  ],
+  "homepage": "https://github.com/DeeeFOX/oh-my-agent-search#readme",
+  "bugs": {
+    "url": "https://github.com/DeeeFOX/oh-my-agent-search/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeeeFOX/oh-my-agent-search.git"
+  },
   "type": "module",
   "scripts": {
     "check": "node --check scripts/doctor.mjs && node --check scripts/install-claude-code.mjs && node --check scripts/probe-searxng-engines.mjs && node --check scripts/self-test.mjs && node --check scripts/setup-searxng-local.mjs && node --check scripts/status.mjs && node --check scripts/uninstall-claude-code.mjs && node --check scripts/verify-searxng-json.mjs",

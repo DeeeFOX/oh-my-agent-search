@@ -1,0 +1,67 @@
+name: Setup help
+description: Get help with Claude Code, MCP, or SearXNG setup.
+title: "Setup: "
+labels:
+  - setup
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include secrets, private endpoints, private hostnames, local absolute paths, customer data, or proxy values.
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What are you trying to set up?
+      placeholder: Add SearXNG search to Claude Code with local scope.
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Intended MCP scope
+      options:
+        - local
+        - user
+        - project
+        - not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: endpoint-kind
+    attributes:
+      label: Endpoint type
+      options:
+        - trusted remote SearXNG
+        - local SearXNG
+        - not configured yet
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Commands tried
+      description: Include sanitized commands only. Replace real endpoint values with `https://search.example.org`.
+      render: sh
+      placeholder: |
+        make verify-search URL="https://search.example.org"
+        make install-preview-check URL="https://search.example.org"
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Sanitized output
+      description: Prefer JSON output when possible. Remove private values before posting.
+      render: json
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety checks
+      options:
+        - label: I removed secrets, private endpoints, local paths, customer data, and proxy values.
+          required: true
+        - label: I used dry-run or preview commands before applying MCP config changes.
+          required: true

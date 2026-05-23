@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a reproducible problem in the starter scripts or docs.
+title: "Bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include secrets, private endpoints, private hostnames, local absolute paths, customer data, or proxy values.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: v0.1.0 or a short commit hash
+    validations:
+      required: false
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Use example endpoints and sanitized output only.
+      render: sh
+      placeholder: |
+        export SEARXNG_URL="https://search.example.org"
+        make verify-search URL="$SEARXNG_URL"
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Sanitized output
+      description: Prefer JSON output when possible. Remove private values before posting.
+      render: text
+    validations:
+      required: false
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety checks
+      options:
+        - label: I removed secrets, private endpoints, local paths, customer data, and proxy values.
+          required: true
+        - label: This report does not ask maintainers to use a private or untrusted endpoint.
+          required: true
